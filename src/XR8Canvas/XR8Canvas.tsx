@@ -1,12 +1,14 @@
 import * as React from "react";
 import * as THREE from "three";
-import { useRef, useEffect } from "react";
 import {
   Canvas,
   CanvasProps,
   useFrame,
   useThree,
   stateContext,
+  RenderCallback,
+  SharedCanvasContext,
+  CanvasContext,
 } from "react-three-fiber";
 import { loadXR8 } from "./getXR8";
 import { XR8 } from "./XR8";
@@ -19,8 +21,9 @@ export const XR8Canvas = ({
   ...props
 }: XR8Props & CanvasProps & React.HTMLAttributes<HTMLDivElement>) => (
   <Canvas {...props}>
-    <InsideCanvas onReady={onReady} onError={onError} xr8ApiKey={xr8ApiKey} />
-    {children}
+    <InsideCanvas onReady={onReady} onError={onError} xr8ApiKey={xr8ApiKey}>
+      {children}
+    </InsideCanvas>
   </Canvas>
 );
 
@@ -30,25 +33,33 @@ type XR8Props = {
   onError?: (error: Error) => void;
 };
 
-const InsideCanvas = ({ onReady, onError, xr8ApiKey }: XR8Props) => {
+const InsideCanvas = ({
+  onReady,
+  onError,
+  xr8ApiKey,
+  children,
+}: XR8Props & { children: any }) => {
   const { gl: renderer, scene, subscribe, camera } = useThree();
 
   // as we subscribe with a priority,
   // react-tree-fiber allows us to replace the render function
   // replace it with a void function, as the render loop is handled by XR8
-  const voidRenderCallback = useRef(() => undefined);
-  useEffect(() => subscribe(voidRenderCallback, 1), [subscribe]);
+  const contextRef = React.useRef<CanvasContext>();
+  const voidRenderCallback = React.useRef((c: CanvasContext) => {
+    contextRef.current = c;
+  });
+  React.useEffect(() => subscribe(voidRenderCallback, 1), [subscribe]);
   const canvas = renderer.domElement;
 
   // config renderer
   renderer.autoClear = false;
 
   // hold callback as reference, to have the latest version in the next closure
-  const callbackEvents = useRef({ onReady, onError });
+  const callbackEvents = React.useRef({ onReady, onError });
   callbackEvents.current.onReady = onReady;
   callbackEvents.current.onError = onError;
 
-  useEffect(() => {
+  React.useEffect(() => {
     let canceled = false;
     let trackingReadyCalled = false;
     let xr8: XR8;
@@ -76,7 +87,7 @@ const InsideCanvas = ({ onReady, onError, xr8ApiKey }: XR8Props) => {
             onCanvasSizeChange: ({ canvasWidth, canvasHeight }) => {
               renderer.setSize(canvasWidth, canvasHeight);
             },
-            onUpdate: ({ processCpuResult }) => {
+            onUpdate: ({ processCpuResult, fps }) => {
               // update camera position
               if (processCpuResult?.reality) {
                 const {
@@ -100,6 +111,12 @@ const InsideCanvas = ({ onReady, onError, xr8ApiKey }: XR8Props) => {
                   trackingReadyCalled = true;
                   callbackEvents.current.onReady?.();
                 }
+
+                const context = contextRef.current;
+                if (context)
+                  subscribers.current.forEach(({ ref }) =>
+                    ref.current(context, 1 / fps)
+                  );
               }
             },
             onRender: () => {
@@ -130,5 +147,29 @@ const InsideCanvas = ({ onReady, onError, xr8ApiKey }: XR8Props) => {
     };
   }, [canvas, xr8ApiKey]);
 
-  return null;
+  const subscribers = React.useRef<
+    { ref: React.MutableRefObject<RenderCallback>; priority: number }[]
+  >([]);
+
+  const originalContext = React.useContext(stateContext);
+
+  const patchedContext = {
+    ...originalContext,
+
+    subscribe: (ref: React.MutableRefObject<RenderCallback>, priority = 0) => {
+      subscribers.current.push({ ref, priority: priority });
+      subscribers.current.sort((a, b) => a.priority - b.priority);
+
+      return () => {
+        const i = subscribers.current.findIndex((x) => x.ref === ref);
+        if (i >= 0) subscribers.current.splice(i, 1);
+      };
+    },
+  };
+
+  return (
+    <stateContext.Provider value={patchedContext}>
+      {children}
+    </stateContext.Provider>
+  );
 };
