@@ -21,4 +21,5 @@ module.exports = {
       },
     ],
   ],
+  devOptions: { secure: true },
 };
