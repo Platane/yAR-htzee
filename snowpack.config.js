@@ -9,6 +9,8 @@ module.exports = {
     //
     "@snowpack/plugin-typescript",
 
+    "@snowpack/plugin-webpack",
+
     [
       "snowpack-plugin-replace",
       {
@@ -21,5 +23,12 @@ module.exports = {
       },
     ],
   ],
+
   devOptions: { secure: true },
+
+  optimize: {
+    bundle: true,
+    minify: false,
+    target: "es2018",
+  },
 };

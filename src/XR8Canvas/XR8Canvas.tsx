@@ -3,11 +3,9 @@ import * as THREE from "three";
 import {
   Canvas,
   CanvasProps,
-  useFrame,
   useThree,
   stateContext,
   RenderCallback,
-  SharedCanvasContext,
   CanvasContext,
 } from "react-three-fiber";
 import { loadXR8 } from "./getXR8";
@@ -143,7 +141,7 @@ const InsideCanvas = ({
 
     return () => {
       canceled = true;
-      xr8.stop();
+      xr8?.stop();
     };
   }, [canvas, xr8ApiKey]);
 
