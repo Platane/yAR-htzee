@@ -1,5 +1,5 @@
 import { createElement } from "react";
 import { render } from "react-dom";
-import { App } from "./App/App";
+import { Boot } from "./App/Boot";
 
-render(createElement(App), document.getElementById("root"));
+render(createElement(Boot), document.getElementById("root"));
