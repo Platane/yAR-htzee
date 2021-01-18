@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as THREE from "three";
 import { useFrame } from "react-three-fiber";
-import { Dice } from "../Dice";
+import { Game } from "./Game";
 
 type Props = { placed: boolean; onPlace: () => void };
 
@@ -26,9 +26,9 @@ export const Board = ({ placed, onPlace }: Props) => {
         <group ref={transformContainerRef}>
           <Circle onClick={onPlace} placed={placed} />
 
-          <Cube />
+          <Ground />
 
-          <Dice />
+          <Game />
         </group>
       </group>
     </>
@@ -45,10 +45,10 @@ const getGroundPoint = (
   return raycaster.ray.intersectPlane(ground, new THREE.Vector3());
 };
 
-const Cube = () => (
-  <mesh position={[0, 0.15, 0]} scale={[0.3, 0.3, 0.3]}>
-    <boxBufferGeometry args={[1, 1, 1]} />
-    <meshPhysicalMaterial color={0x3453ff} metalness={0} roughness={0} />
+const Ground = () => (
+  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]} receiveShadow>
+    <planeBufferGeometry args={[10, 10]} />
+    <shadowMaterial opacity={0.4} />
   </mesh>
 );
 

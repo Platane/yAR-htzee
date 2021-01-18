@@ -8,7 +8,7 @@ export const Boot = () => {
   return (
     <ErrorBoundary>
       <React.Suspense fallback={null}>
-        <LazyApp onReady={() => setReady(true)} ready={ready} />
+        <LazyApp onReady={() => setReady(true)} />
       </React.Suspense>
 
       {!ready && (

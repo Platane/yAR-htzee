@@ -1,25 +1,32 @@
 import * as React from "react";
-import { Environment } from "drei";
+import { Environment, useProgress } from "drei";
 import { XR8Canvas } from "../XR8Canvas/XR8Canvas";
 import { Board } from "./Board";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
-const envmapUrl = "equirectangular.png";
 
-type Props = { ready: boolean; onReady: () => void };
+type Props = { onReady: () => void };
 
-export const App = ({ ready, onReady }: Props) => {
+export const App = ({ onReady }: Props) => {
   const [error, setError] = React.useState<Error>();
   if (error) throw error;
 
   const [placed, setPlaced] = React.useState(false);
 
+  const [xr8Ready, setXr8Ready] = React.useState(false);
+  const { active } = useProgress();
+  const ready = xr8Ready && !active;
+  React.useEffect(() => {
+    if (ready) onReady();
+  }, [ready]);
+
   return (
     <>
       <XR8Canvas
         xr8ApiKey={xr8ApiKey}
-        onReady={onReady}
+        onReady={() => setXr8Ready(true)}
         onError={setError as any}
+        shadowMap
         style={{
           position: "fixed",
           top: 0,
@@ -32,13 +39,15 @@ export const App = ({ ready, onReady }: Props) => {
         <ErrorBoundary onError={setError}>
           {false && <ambientLight />}
 
-          {false && <directionalLight position={[10, 10, 10]} />}
+          <directionalLight position={[10, 10, 10]} castShadow />
 
           <React.Suspense fallback={null}>
             <Environment preset="apartment" />
           </React.Suspense>
 
-          <Board placed={placed} onPlace={() => setPlaced(true)} />
+          <React.Suspense fallback={null}>
+            <Board placed={placed} onPlace={() => setPlaced(true)} />
+          </React.Suspense>
         </ErrorBoundary>
       </XR8Canvas>
 
