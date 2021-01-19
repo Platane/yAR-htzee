@@ -1,7 +1,7 @@
 import { useGLTF } from "drei";
 import * as React from "react";
 
-const diceUrl = "/dice.glb";
+const diceUrl = "assets/dice.glb";
 
 useGLTF.preload(diceUrl);
 
