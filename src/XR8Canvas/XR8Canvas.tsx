@@ -11,13 +11,17 @@ import {
 import { loadXR8 } from "./getXR8";
 import { XR8 } from "./XR8";
 
+export type Props = XR8Props &
+  CanvasProps &
+  React.HTMLAttributes<HTMLDivElement>;
+
 export const XR8Canvas = ({
   children,
   xr8ApiKey,
   onReady,
   onError,
   ...props
-}: XR8Props & CanvasProps & React.HTMLAttributes<HTMLDivElement>) => (
+}: Props) => (
   <Canvas {...props}>
     <InsideCanvas onReady={onReady} onError={onError} xr8ApiKey={xr8ApiKey}>
       {children}
@@ -81,6 +85,11 @@ const InsideCanvas = ({
                 throw new Error("context do not match");
 
               renderer.setSize(canvasWidth, canvasHeight);
+
+              xr8.XrController.updateCameraProjectionMatrix({
+                origin: camera.position,
+                facing: camera.quaternion,
+              });
             },
             onCanvasSizeChange: ({ canvasWidth, canvasHeight }) => {
               renderer.setSize(canvasWidth, canvasHeight);

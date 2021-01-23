@@ -1,7 +1,8 @@
 import * as React from "react";
-import { Environment, useProgress } from "drei";
-import { XR8Canvas } from "../XR8Canvas/XR8Canvas";
+import { Environment, Stats, useProgress } from "drei";
 import { Board } from "./Board";
+import * as THREE from "three";
+import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
@@ -22,10 +23,13 @@ export const App = ({ onReady }: Props) => {
 
   return (
     <>
-      <XR8Canvas
+      <Stats />
+
+      <VersatileCanvas
         xr8ApiKey={xr8ApiKey}
         onReady={() => setXr8Ready(true)}
         onError={setError as any}
+        camera={{ position: new THREE.Vector3(0, 6, 6) }}
         shadowMap
         style={{
           position: "fixed",
@@ -37,19 +41,19 @@ export const App = ({ onReady }: Props) => {
         }}
       >
         <ErrorBoundary onError={setError}>
-          {false && <ambientLight />}
-
           <directionalLight position={[10, 10, 10]} castShadow />
 
-          <React.Suspense fallback={null}>
-            <Environment preset="apartment" />
-          </React.Suspense>
+          {false && (
+            <React.Suspense fallback={null}>
+              <Environment preset="apartment" />
+            </React.Suspense>
+          )}
 
           <React.Suspense fallback={null}>
             <Board placed={placed} onPlace={() => setPlaced(true)} />
           </React.Suspense>
         </ErrorBoundary>
-      </XR8Canvas>
+      </VersatileCanvas>
 
       {ready && (
         <div style={{ position: "absolute", left: 0, top: 0, zIndex: 1 }}>

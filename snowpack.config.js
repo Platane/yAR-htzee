@@ -37,7 +37,7 @@ module.exports = {
         list: [
           {
             from: "process.env.XR8_API_KEY",
-            to: JSON.stringify(process.env.XR8_API_KEY),
+            to: JSON.stringify(process.env.XR8_API_KEY || ""),
           },
         ],
       },

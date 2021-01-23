@@ -1,10 +1,6 @@
 import * as React from "react";
 import { loadXR8 } from "../XR8Canvas/getXR8";
 
-// preload 8thwall
-const xr8ApiKey = process.env.XR8_API_KEY!;
-loadXR8(xr8ApiKey);
-
 // import LazyApp from "./App";
 const LazyApp = React.lazy(() => import("./App"));
 

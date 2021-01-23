@@ -1,33 +1,4 @@
-export const categories = [
-  "Aces",
-  "Two",
-  "Three",
-  "Four",
-  "Five",
-  "Six",
-
-  "Three Of A Kind",
-  "Four Of A Kind",
-  "Full House",
-  "Small Straight",
-  "Large Straight",
-  "Yahtzee",
-  "Chance",
-] as const;
-
-export type Category = typeof categories[number];
-
-const upScore = (n: number) => (set: number[]) =>
-  set.reduce((s, x) => s + (x === n ? n : 0), 0);
-
-const sumScore = (set: number[]) => set.reduce((s, x) => s + x, 0);
-
-const count = (set: number[]) => {
-  const o = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-  for (const n of set) (o as any)[n]++;
-
-  return o;
-};
+import { Category } from "./types";
 
 export const getScore = (category: Category, set: number[]) => {
   switch (category) {
@@ -80,4 +51,14 @@ export const getScore = (category: Category, set: number[]) => {
   }
 };
 
-export const State = {};
+const upScore = (n: number) => (set: number[]) =>
+  set.reduce((s, x) => s + (x === n ? n : 0), 0);
+
+const sumScore = (set: number[]) => set.reduce((s, x) => s + x, 0);
+
+const count = (set: number[]) => {
+  const o = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+  for (const n of set) (o as any)[n]++;
+
+  return o;
+};
