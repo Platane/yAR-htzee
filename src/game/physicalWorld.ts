@@ -90,12 +90,12 @@ export const createWorld = () => {
 
   let deltaStable = 0;
 
-  const state: State = {
+  const state = {
     status: "pre-roll",
     picked: [0, 1, 2, 3, 5],
 
     pushX: 0,
-  };
+  } as State;
 
   const step = (dt_: number) => {
     const dt = Math.min(dt_, stepDuration * 3);
@@ -189,8 +189,8 @@ export const createWorld = () => {
   };
 
   const setPickedDice = (diceIndices: number[]) => {
-    if (state.status === "picking") {
-    }
+    // if (state.status === "picking") {
+    // }
   };
 
   return {
