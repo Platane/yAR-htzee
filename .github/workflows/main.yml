@@ -17,8 +17,7 @@ jobs:
       - run: yarn type
       - run: yarn lint
       - run: yarn build
-      - run: yarn surge ./dist $DEPLOY_ORIGIN
+      - run: yarn surge ./build yAR-htzee-platane.surge.sh
         env:
           SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
           SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
-          DEPLOY_ORIGIN: yAR-htzee-platane.surge.sh
