@@ -2,8 +2,7 @@ import * as React from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "react-three-fiber";
 import { Dice } from "./Dice";
-import { createWorld, nDice } from "../game/physicalWorld";
-import { Target } from "./Target";
+import { createWorld, nDice } from "../../game/physicalWorld";
 
 type Props = {
   placed: boolean;

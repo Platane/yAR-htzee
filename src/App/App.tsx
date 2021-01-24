@@ -1,9 +1,10 @@
 import * as React from "react";
 import { Environment, Stats, useProgress } from "drei";
-import { Board } from "./Board";
+import { Board } from "./Scene/Board";
 import * as THREE from "three";
 import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
-import { Target } from "./Target";
+import { Target } from "./Scene/Target";
+import { Dice } from "./Ui/Dice";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
@@ -19,9 +20,9 @@ export const App = ({ onReady }: Props) => {
   const onStatusChanged = (status: string, roll?: number[]) =>
     setGame({ status, roll });
 
-  const [xr8Ready, setXr8Ready] = React.useState(false);
+  const [rendererReady, setRendererReady] = React.useState(false);
   const { active } = useProgress();
-  const ready = xr8Ready && !active;
+  const ready = rendererReady && !active;
   React.useEffect(() => {
     if (ready) onReady();
   }, [ready]);
@@ -32,7 +33,7 @@ export const App = ({ onReady }: Props) => {
 
       <VersatileCanvas
         xr8ApiKey={xr8ApiKey}
-        onReady={() => setXr8Ready(true)}
+        onReady={() => setRendererReady(true)}
         onError={setError as any}
         camera={{ position: new THREE.Vector3(0, 6, 6) }}
         shadowMap
@@ -66,26 +67,25 @@ export const App = ({ onReady }: Props) => {
 
       {ready && (
         <div style={{ position: "absolute", left: 0, top: 0, zIndex: 1 }}>
-          <h1>app</h1>
+          <h1>
+            app
+            <Dice value={1} />
+            <Dice value={2} />
+            <Dice value={3} />
+            <Dice value={4} />
+            <Dice value={5} />
+            <Dice value={6} />
+          </h1>
           <h2>
             {game.status}
-            {game.roll
-              ?.map((x: 1 | 2 | 3 | 4 | 5 | 6) => diceMap[x])
-              .join(" ")}{" "}
+            {game.roll?.map((x: any, i: number) => (
+              <Dice key={i} value={x} />
+            ))}
           </h2>
         </div>
       )}
     </>
   );
-};
-
-const diceMap = {
-  1: "1️⃣",
-  2: "2️⃣",
-  3: "3️⃣",
-  4: "4️⃣",
-  5: "5️⃣",
-  6: "6️⃣",
 };
 
 // <Board placed={placed} />

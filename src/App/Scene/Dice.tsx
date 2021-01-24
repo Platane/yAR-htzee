@@ -1,7 +1,6 @@
 import { useGLTF } from "drei";
 import * as React from "react";
 import * as THREE from "three";
-import { Texture } from "three";
 
 const diceUrl = "assets/dice.glb";
 
