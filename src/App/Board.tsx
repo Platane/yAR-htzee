@@ -4,12 +4,21 @@ import { useFrame, useThree } from "react-three-fiber";
 import { Dice } from "./Dice";
 import { createWorld, nDice } from "../game/physicalWorld";
 
-type Props = { placed: boolean; onPlace: () => void };
+type Props = {
+  placed: boolean;
+  onPlace: () => void;
+  onStatusChanged?: (status: string) => void;
+};
 
-export const Board = ({}: Props) => {
+export const Board = ({ onStatusChanged }: Props) => {
   const dicesRef = React.useRef<THREE.Object3D>();
 
   const [world] = React.useState(createWorld);
+
+  React.useEffect(() => {
+    if (!onStatusChanged) return;
+    return world.on("status-changed", onStatusChanged);
+  }, [world, onStatusChanged]);
 
   useFrame(({ camera }, dt) => {
     world.updateCamera(camera);
@@ -24,9 +33,24 @@ export const Board = ({}: Props) => {
     }
   });
 
-  const [picked, setPicked] = React.useState<number[]>([]);
-  const toggle = (i: number) => () =>
-    setPicked((p) => (p.includes(i) ? p.filter((u) => u !== i) : [...p, i]));
+  const [picked, setPicked] = React.useState<number[] | null>([0, 1, 2, 3, 4]);
+  React.useEffect(() => {
+    return world.on("status-changed", (s) =>
+      setPicked(s === "picking" ? [] : null)
+    );
+  }, [world, setPicked]);
+  const toggle = (i: number) =>
+    picked &&
+    (() =>
+      setPicked((p) => {
+        if (!p) return p;
+        if (p.includes(i)) return p.filter((u) => u !== i);
+        else return [...p, i];
+      }));
+
+  React.useEffect(() => {
+    world.setPickedDice(picked ?? []);
+  }, [world, picked]);
 
   // attach event handler
   const {
@@ -69,7 +93,7 @@ export const Board = ({}: Props) => {
           <Dice
             key={i}
             onClick={toggle(i)}
-            scale={picked.includes(i) ? [1.2, 1.2, 1.2] : [1, 1, 1]}
+            scale={picked?.includes(i) ? [1.2, 1.2, 1.2] : [1, 1, 1]}
           />
         ))}
       </group>

@@ -14,6 +14,10 @@ export const App = ({ onReady }: Props) => {
 
   const [placed, setPlaced] = React.useState(false);
 
+  const [game, setGame] = React.useState({ status: "picking" } as any);
+  const onStatusChanged = (status: string, roll?: number[]) =>
+    setGame({ status, roll });
+
   const [xr8Ready, setXr8Ready] = React.useState(false);
   const { active } = useProgress();
   const ready = xr8Ready && !active;
@@ -50,7 +54,11 @@ export const App = ({ onReady }: Props) => {
           )}
 
           <React.Suspense fallback={null}>
-            <Board placed={placed} onPlace={() => setPlaced(true)} />
+            <Board
+              placed={placed}
+              onPlace={() => setPlaced(true)}
+              onStatusChanged={onStatusChanged}
+            />
           </React.Suspense>
         </ErrorBoundary>
       </VersatileCanvas>
@@ -58,16 +66,25 @@ export const App = ({ onReady }: Props) => {
       {ready && (
         <div style={{ position: "absolute", left: 0, top: 0, zIndex: 1 }}>
           <h1>app</h1>
-          <button
-            style={{ padding: "10px" }}
-            onClick={() => setPlaced((x) => !x)}
-          >
-            {placed ? "reposition board" : "place board"}
-          </button>
+          <h2>
+            {game.status}
+            {game.roll
+              ?.map((x: 1 | 2 | 3 | 4 | 5 | 6) => diceMap[x])
+              .join(" ")}{" "}
+          </h2>
         </div>
       )}
     </>
   );
+};
+
+const diceMap = {
+  1: "1️⃣",
+  2: "2️⃣",
+  3: "3️⃣",
+  4: "4️⃣",
+  5: "5️⃣",
+  6: "6️⃣",
 };
 
 // <Board placed={placed} />

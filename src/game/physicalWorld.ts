@@ -10,7 +10,7 @@ const worldSimulationSpeed = 2;
 
 const springParams = { tension: 120, friction: 12 };
 
-export const nDice = 1;
+export const nDice = 5;
 
 export const createWorld = () => {
   const world = new CANNON.World();
@@ -38,6 +38,7 @@ export const createWorld = () => {
   type Pose = { position: CANNON.Vec3; quaternion: CANNON.Quaternion };
   const dices: (CANNON.Body & {
     pull: { edge: Pose; inHand: Pose; spring: CANNON.Spring };
+    picked: boolean;
   })[] = [];
   {
     const size = new CANNON.Vec3(0.5, 0.5, 0.5);
@@ -50,6 +51,8 @@ export const createWorld = () => {
       body.addShape(shape);
       world.addBody(body);
 
+      const o = new CANNON.Vec3((n % 3) - 1, Math.floor(n / 2), 0);
+
       body.pull = {
         spring: new CANNON.Spring(body, ground, {
           localAnchorA: new CANNON.Vec3(),
@@ -60,7 +63,7 @@ export const createWorld = () => {
         }),
 
         inHand: {
-          position: new CANNON.Vec3(Math.random() - 0.5, -1, -1),
+          position: o.scale(0.5).vadd(new CANNON.Vec3(0, -1.7, -2)),
           quaternion: new CANNON.Quaternion().setFromEuler(
             Math.random() * Math.PI * 2,
             Math.random() * Math.PI * 2,
@@ -68,11 +71,7 @@ export const createWorld = () => {
           ),
         },
         edge: {
-          position: new CANNON.Vec3(
-            (Math.random() - 0.5) * 2,
-            (Math.random() - 0.5) * 2,
-            -(Math.random() + 6) * 0.7
-          ),
+          position: o.scale(1.6).addScaledVector(-5, CANNON.Vec3.UNIT_Z),
           quaternion: new CANNON.Quaternion().setFromEuler(
             Math.random() * Math.PI * 2,
             Math.random() * Math.PI * 2,
@@ -89,151 +88,173 @@ export const createWorld = () => {
   const cameraPosition = new CANNON.Vec3();
   const cameraDirection = new CANNON.Vec3();
   const cameraRotationMatrix = new CANNON.Mat3();
-  const diceValues = dices.map((body) => getUpFace(body.quaternion));
 
+  // x=0  -> dice is on the board
+  // x=1  -> dice is in hand
   const pullSpring = { x: 0, v: 0, target: 0 };
+
+  // x=0  -> dice is in hand
+  // x=1  -> dice is on edge
+  const pushSpring = { x: 0, v: 0, target: 0 };
 
   let deltaStable = 0;
 
-  let status: "pre-roll" | "rolling" | "picking" = "pre-roll";
+  let status: "pre-roll" | "rolling" | "picking" = "picking";
 
   const step = (dt_: number) => {
     const dt = Math.min(dt_, stepDuration * 3);
 
+    stepSpring(pullSpring, springParams, pullSpring.target, dt);
+    stepSpring(pushSpring, springParams, pushSpring.target, dt);
+
     if (status === "pre-roll") {
-      stepSpring(pullSpring, springParams, pullSpring.target, dt);
+      if (pushSpring.x > 0.8) roll();
 
       //
     } else if (status === "rolling") {
       world.step(stepDuration, dt * worldSimulationSpeed);
 
       for (const dice of dices)
-        if (dice.velocity.lengthSquared() > 0.1) deltaStable = 0;
+        if (
+          dice.velocity.lengthSquared() > 0.1 ||
+          dice.angularVelocity.lengthSquared() > 0.01
+        )
+          deltaStable = 0;
 
       deltaStable += dt;
 
       if (deltaStable > 0.5) {
         status = "picking";
-
-        pullSpring.target = 0;
-        pullSpring.x = 0;
-        pullSpring.v = 0;
-
-        for (let i = dices.length; i--; )
-          diceValues[i] = getUpFace(dices[i].quaternion);
-
-        ee.emit("rolling-stable", diceValues);
+        ee.emit(
+          "status-changed",
+          status,
+          dices.map((d) => getUpFace(d.quaternion))
+        );
       }
 
       //
     } else if (status === "picking") {
-      stepSpring(pullSpring, springParams, pullSpring.target, dt);
       world.step(stepDuration, dt * worldSimulationSpeed);
     }
   };
 
   const setPullX = (x: number) => {
     if (status === "pre-roll") {
-      pullSpring.target = MathUtils.clamp(-x * 2, 0, 10);
-      if (pullSpring.target > 0.9) {
-        roll();
-      }
-    } else if (status === "picking") {
+      pushSpring.target = MathUtils.clamp(-x * 2, 0, 10);
+    } else if (status === "picking" && dices.some((d) => d.picked)) {
       pullSpring.target = MathUtils.clamp(x * 2, 0, 1);
     }
   };
 
   const roll = () => {
-    ee.emit("rolling-start");
-
     status = "rolling";
+    ee.emit("status-changed", status);
 
     for (const dice of dices) {
-      const k = pullSpring.x;
+      if (!dice.picked) continue;
 
-      A.copy(dice.pull.inHand.position);
-      cameraRotationMatrix.vmult(A, A);
-      cameraPosition.vadd(A, A);
+      cameraLocalToWorld(dice.pull.inHand.position, inHand);
+      cameraLocalToWorld(dice.pull.edge.position, pushEdge);
 
-      B.copy(dice.pull.edge.position);
-      cameraRotationMatrix.vmult(B, B);
-      cameraPosition.vadd(B, B);
-
-      E.copy(A);
-      E.lerp(B, k, E);
+      E.copy(CANNON.Vec3.ZERO);
+      E.copy(inHand);
+      E.lerp(dice.position, 1 - pullSpring.x, E);
+      E.lerp(pushEdge, pushSpring.x, E);
 
       dice.position.copy(E);
 
+      const forceDirection = CANNON.Vec3.UNIT_Z.clone();
+      cameraRotationMatrix.vmult(forceDirection, forceDirection);
+      forceDirection.y = 0;
+      forceDirection.normalize();
+
       dice.applyImpulse(
-        new CANNON.Vec3(0, 0, -1),
+        forceDirection.scale(-1),
         new CANNON.Vec3(
           Math.random() - 0.5,
           Math.random() - 0.5,
           Math.random() - 0.5
         )
       );
-      dice.applyForce(new CANNON.Vec3(0, 0, -80), new CANNON.Vec3(0, 0, 0));
+      dice.applyForce(forceDirection.scale(-80), new CANNON.Vec3(0, 0, 0));
     }
+
+    pushSpring.target = 0;
+    pushSpring.x = 0;
+    pushSpring.v = 0;
+
+    pullSpring.x = 0;
+    pullSpring.target = 0;
+    pullSpring.v = 0;
   };
 
   const release = () => {
-    if (status === "pre-roll") pullSpring.target = 0;
+    if (status === "pre-roll") {
+      if (pushSpring.target > 0.7) pushSpring.target = 1;
+      else pushSpring.target = 0;
+    }
     if (status === "picking") {
       if (pullSpring.x > 0.8) {
-        pullSpring.x = 0;
-        pullSpring.v = 0;
+        pullSpring.target = 1;
         status = "pre-roll";
-      }
-      pullSpring.target = 0;
+        ee.emit("status-changed", status);
+      } else pullSpring.target = 0;
     }
   };
 
   const setPickedDice = (diceIndices: number[]) => {
+    if (status !== "picking") return;
+
+    for (const dice of dices) {
+      dice.picked = false;
+      dice.mass = 5;
+    }
+
+    diceIndices.forEach((i) => {
+      dices[i].picked = true;
+      dices[i].mass = 1;
+    });
+
     // if (status === "picking") {
     // }
   };
 
-  const A = new CANNON.Vec3();
-  const B = new CANNON.Vec3();
+  const inHand = new CANNON.Vec3();
+  const pushEdge = new CANNON.Vec3();
   const E = new CANNON.Vec3();
+
+  const cameraLocalToWorld = (A: CANNON.Vec3, target: CANNON.Vec3) => {
+    target.copy(A);
+    cameraRotationMatrix.vmult(target, target);
+    cameraPosition.vadd(target, target);
+  };
+
   const copy = (i: number, target: THREE.Object3D) => {
     const dice = dices[i];
 
-    if (status === "rolling") {
+    if (status === "rolling" || !dice.picked) {
       target.position.copy(dice.position as any);
       target.setRotationFromQuaternion(dice.quaternion as any);
 
       //
-    } else if (status === "pre-roll") {
-      const k = pullSpring.x;
+    } else if (status === "picking" || status === "pre-roll") {
+      cameraLocalToWorld(dice.pull.inHand.position, inHand);
+      cameraLocalToWorld(dice.pull.edge.position, pushEdge);
 
-      A.copy(dice.pull.inHand.position);
-      cameraRotationMatrix.vmult(A, A);
-      cameraPosition.vadd(A, A);
-
-      B.copy(dice.pull.edge.position);
-      cameraRotationMatrix.vmult(B, B);
-      cameraPosition.vadd(B, B);
-
-      E.copy(A);
-      E.lerp(B, k, E);
+      E.copy(CANNON.Vec3.ZERO);
+      E.copy(inHand);
+      E.lerp(dice.position, 1 - pullSpring.x, E);
+      E.lerp(pushEdge, pushSpring.x, E);
 
       target.position.copy(E as any);
 
+      const Eq = new CANNON.Quaternion();
+      Eq.copy(dice.pull.inHand.quaternion);
+      Eq.slerp(dice.quaternion, 1 - pullSpring.x, Eq);
+      Eq.slerp(dice.pull.edge.quaternion, pushSpring.x, Eq);
+
+      target.setRotationFromQuaternion(Eq as any);
       //
-    } else if (status === "picking") {
-      const k = 1 - pullSpring.x;
-
-      A.copy(dice.pull.inHand.position);
-      cameraRotationMatrix.vmult(A, A);
-      cameraPosition.vadd(A, A);
-
-      B.copy(dice.position);
-
-      E.copy(A);
-      E.lerp(B, k, E);
-
-      target.position.copy(E as any);
     }
   };
 
@@ -255,7 +276,10 @@ export const createWorld = () => {
     setPullX,
     setPickedDice,
   };
-  const ee: Emitter & typeof api = Object.assign(createNanoEvents(), api);
+  const ee: Emitter<{
+    "status-changed": (s: typeof status, x?: any) => void;
+  }> &
+    typeof api = Object.assign(createNanoEvents(), api);
 
   return ee;
 };
@@ -265,6 +289,7 @@ const up = new CANNON.Vec3(0, 1, 0);
 const getUpFace = (q: CANNON.Quaternion) => {
   up.copy(CANNON.Vec3.UNIT_Y);
   m.setRotationFromQuaternion(q);
+  m.reverse(m);
   m.vmult(up, up);
 
   let value = 0;
