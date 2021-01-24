@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { useFrame, useThree } from "react-three-fiber";
 import { Dice } from "./Dice";
 import { createWorld, nDice } from "../game/physicalWorld";
+import { Target } from "./Target";
 
 type Props = {
   placed: boolean;
@@ -90,40 +91,16 @@ export const Board = ({ onStatusChanged }: Props) => {
 
       <group ref={dicesRef}>
         {Array.from({ length: nDice }).map((_, i) => (
-          <Dice
-            key={i}
-            onClick={toggle(i)}
-            scale={picked?.includes(i) ? [1.2, 1.2, 1.2] : [1, 1, 1]}
-          />
+          <Dice key={i} onClick={toggle(i)} selected={picked?.includes(i)} />
         ))}
       </group>
     </>
   );
 };
 
-const getGroundPoint = (camera: THREE.Camera, coord = { x: 0, y: 0 }) => {
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(coord, camera);
-  const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  return raycaster.ray.intersectPlane(ground, new THREE.Vector3());
-};
-
 const Ground = () => (
   <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]} receiveShadow>
     <planeBufferGeometry args={[100, 100]} />
     <shadowMaterial opacity={0.4} />
-  </mesh>
-);
-
-const Circle = ({ placed, ...props }: any) => (
-  <mesh {...props} rotation={[-Math.PI / 2, 0, 0]}>
-    <circleBufferGeometry args={[1, 32]} />
-    <meshPhysicalMaterial
-      color={"orange"}
-      opacity={placed ? 0.5 : 0.2}
-      metalness={0}
-      roughness={0}
-      transparent
-    />
   </mesh>
 );

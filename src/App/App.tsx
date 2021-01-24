@@ -3,6 +3,7 @@ import { Environment, Stats, useProgress } from "drei";
 import { Board } from "./Board";
 import * as THREE from "three";
 import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
+import { Target } from "./Target";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
@@ -60,6 +61,8 @@ export const App = ({ onReady }: Props) => {
               onStatusChanged={onStatusChanged}
             />
           </React.Suspense>
+
+          <Target />
         </ErrorBoundary>
       </VersatileCanvas>
 
