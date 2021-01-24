@@ -21,4 +21,5 @@ yarn dev
 
 # Attribution
 
-["Dice"](https://skfb.ly/6RtsC) by tnRaro is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+- ["Dice"](https://skfb.ly/6RtsC) by tnRaro is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+- ["Lebombo"](https://hdrihaven.com/hdri/?c=indoor&h=lebombo) by Greg Zaal is licensed under CC0 (https://creativecommons.org/share-your-work/public-domain/cc0/)

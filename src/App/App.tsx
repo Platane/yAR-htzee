@@ -46,13 +46,11 @@ export const App = ({ onReady }: Props) => {
         }}
       >
         <ErrorBoundary onError={setError}>
-          <directionalLight position={[10, 10, 10]} castShadow />
+          <directionalLight position={[10, 8, 6]} intensity={0} castShadow />
 
-          {false && (
-            <React.Suspense fallback={null}>
-              <Environment preset="apartment" />
-            </React.Suspense>
-          )}
+          <React.Suspense fallback={null}>
+            <Environment path={"assets/"} files={"lebombo_1k.hdr"} />
+          </React.Suspense>
 
           <React.Suspense fallback={null}>
             <Board
