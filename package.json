@@ -9,12 +9,13 @@
     "@react-three/cannon": "0.5.3",
     "cannon-es": "0.16.0",
     "cannon-es-debugger": "0.1.1",
-    "drei": "2.2.17",
+    "drei": "2.2.21",
     "nanoevents": "5.1.10",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "react-three-fiber": "5.3.14",
-    "three": "0.124.0"
+    "react-three-fiber": "5.3.17",
+    "three": "0.124.0",
+    "zustand": "3.3.1"
   },
   "devDependencies": {
     "@snowpack/plugin-optimize": "0.2.13",

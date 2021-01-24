@@ -15,22 +15,11 @@ export const getScore = (category: Category, set: number[]) => {
     case "Six":
       return upScore(6)(set);
 
-    case "Small Straight": {
-      const cc = Object.keys(count(set));
-      return (cc[1] && cc[2] && cc[3] && cc[4]) ||
-        (cc[2] && cc[3] && cc[4] && cc[5]) ||
-        (cc[3] && cc[4] && cc[5] && cc[6])
-        ? 30
-        : 0;
-    }
+    case "Small Straight":
+      return maxChainLength(set) >= 4 ? 30 : 0;
 
-    case "Large Straight": {
-      const cc = Object.keys(count(set));
-      return (cc[1] && cc[2] && cc[3] && cc[4] && cc[5]) ||
-        (cc[2] && cc[3] && cc[4] && cc[5] && cc[6])
-        ? 40
-        : 0;
-    }
+    case "Large Straight":
+      return maxChainLength(set) >= 5 ? 40 : 0;
 
     case "Three Of A Kind":
       return Object.values(count(set)).some((n) => n >= 3) ? sumScore(set) : 0;
@@ -49,6 +38,14 @@ export const getScore = (category: Category, set: number[]) => {
     case "Chance":
       return sumScore(set);
   }
+};
+
+const maxChainLength = (set: number[]) =>
+  Math.max(...set.map((u) => lengthOfChainStartingWith(u, set)));
+
+const lengthOfChainStartingWith = (n: number, set: number[]) => {
+  if (set.some((u) => u === n)) lengthOfChainStartingWith(n + 1, set);
+  return 0;
 };
 
 const upScore = (n: number) => (set: number[]) =>

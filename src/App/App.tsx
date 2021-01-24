@@ -5,6 +5,10 @@ import * as THREE from "three";
 import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
 import { Target } from "./Scene/Target";
 import { Dice } from "./Ui/Dice";
+import { ScoreSheet } from "./Ui/ScoreSheet/ScoreSheet";
+import { useStore } from "./useGame";
+import { Overlay } from "./Ui/Overlay";
+import { Ground } from "./Scene/Ground";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
@@ -14,11 +18,20 @@ export const App = ({ onReady }: Props) => {
   const [error, setError] = React.useState<Error>();
   if (error) throw error;
 
-  const [placed, setPlaced] = React.useState(false);
-
-  const [game, setGame] = React.useState({ status: "picking" } as any);
-  const onStatusChanged = (status: string, roll?: number[]) =>
-    setGame({ status, roll });
+  const {
+    k,
+    status,
+    roundKey,
+    roll,
+    scoreSheet,
+    scoreSheetOpened,
+    dicesToReroll,
+    openScoreSheet,
+    closeScoreSheet,
+    selectCategoryForRoll,
+    toggleDiceReroll,
+    onRollStatusChanged,
+  } = useStore();
 
   const [rendererReady, setRendererReady] = React.useState(false);
   const { active } = useProgress();
@@ -48,41 +61,45 @@ export const App = ({ onReady }: Props) => {
       >
         <ErrorBoundary onError={setError}>
           <directionalLight position={[10, 8, 6]} intensity={0} castShadow />
-
           <React.Suspense fallback={null}>
             <Environment path={"assets/"} files={"lebombo_1k.hdr"} />
-          </React.Suspense>
 
-          <React.Suspense fallback={null}>
             <Board
-              placed={placed}
-              onPlace={() => setPlaced(true)}
-              onStatusChanged={onStatusChanged}
+              roundKey={roundKey}
+              onStatusChanged={onRollStatusChanged}
+              dicesToReroll={dicesToReroll}
+              toggleDiceReroll={toggleDiceReroll}
             />
           </React.Suspense>
+
+          <Ground />
 
           <Target />
         </ErrorBoundary>
       </VersatileCanvas>
 
       {ready && (
-        <div style={{ position: "absolute", left: 0, top: 0, zIndex: 1 }}>
-          <h1>
-            app
-            <Dice value={1} />
-            <Dice value={2} />
-            <Dice value={3} />
-            <Dice value={4} />
-            <Dice value={5} />
-            <Dice value={6} />
-          </h1>
-          <h2>
-            {game.status}
-            {game.roll?.map((x: any, i: number) => (
-              <Dice key={i} value={x} />
-            ))}
-          </h2>
+        <div style={{ position: "absolute", left: 0, top: "48px", zIndex: 1 }}>
+          {roundKey} {k} {status}
+          {roll?.map((x: any, i: number) => (
+            <Dice key={i} value={x} />
+          ))}
+          {!scoreSheetOpened && (
+            <button onClick={openScoreSheet}>score sheet</button>
+          )}
         </div>
+      )}
+
+      {ready && scoreSheetOpened && (
+        <Overlay>
+          <ScoreSheet
+            style={{ width: "calc( 100% - 40px )", maxWidth: "600px" }}
+            scoreSheet={scoreSheet}
+            onClose={closeScoreSheet}
+            onSelectCategory={selectCategoryForRoll}
+            rollCandidate={roll}
+          />
+        </Overlay>
       )}
     </>
   );

@@ -16,3 +16,9 @@ export const categories = [
 ] as const;
 
 export type Category = typeof categories[number];
+
+export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6;
+
+export type DiceRoll = [DiceValue, DiceValue, DiceValue, DiceValue, DiceValue];
+
+export type ScoreSheet = Record<Category, DiceRoll | null>;

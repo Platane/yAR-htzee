@@ -6,7 +6,7 @@ import { MathUtils } from "three";
 
 const stepDuration = 1 / 60;
 
-const worldSimulationSpeed = 2;
+const worldSimulationSpeed = 3;
 
 const springParams = { tension: 120, friction: 12 };
 
@@ -46,12 +46,12 @@ export const createWorld = () => {
     for (let n = nDice; n--; ) {
       const body: any = new CANNON.Body({
         mass: 1,
-        position: new CANNON.Vec3(Math.random(), 0.5 + n * 3, Math.random()),
+        position: new CANNON.Vec3((n % 3) - 1, 0.5, Math.floor(n / 3)),
       });
       body.addShape(shape);
       world.addBody(body);
 
-      const o = new CANNON.Vec3((n % 3) - 1, Math.floor(n / 2), 0);
+      const o = new CANNON.Vec3((n % 3) - 1, Math.floor(n / 3), 0);
 
       body.pull = {
         spring: new CANNON.Spring(body, ground, {
@@ -71,7 +71,9 @@ export const createWorld = () => {
           ),
         },
         edge: {
-          position: o.scale(1.6).addScaledVector(-5, CANNON.Vec3.UNIT_Z),
+          position: o
+            .scale(1.6)
+            .addScaledVector(-4 + 2 * Math.random(), CANNON.Vec3.UNIT_Z),
           quaternion: new CANNON.Quaternion().setFromEuler(
             Math.random() * Math.PI * 2,
             Math.random() * Math.PI * 2,
@@ -99,7 +101,16 @@ export const createWorld = () => {
 
   let deltaStable = 0;
 
-  let status: "pre-roll" | "rolling" | "picking" = "picking";
+  let status: "pre-roll" | "rolling" | "picking" = "pre-roll";
+
+  const reset = () => {
+    pushSpring.target = 0;
+    pushSpring.x = 0;
+    pushSpring.v = 0;
+    pullSpring.target = 1;
+    status = "pre-roll";
+    ee.emit("status-changed", status);
+  };
 
   const step = (dt_: number) => {
     const dt = Math.min(dt_, stepDuration * 3);
@@ -203,8 +214,6 @@ export const createWorld = () => {
   };
 
   const setPickedDice = (diceIndices: number[]) => {
-    if (status !== "picking") return;
-
     for (const dice of dices) {
       dice.picked = false;
       dice.mass = 5;
@@ -214,11 +223,9 @@ export const createWorld = () => {
       dices[i].picked = true;
       dices[i].mass = 1;
     });
-
-    // if (status === "picking") {
-    // }
   };
 
+  // TODO use transform instead
   const inHand = new CANNON.Vec3();
   const pushEdge = new CANNON.Vec3();
   const E = new CANNON.Vec3();
@@ -269,6 +276,7 @@ export const createWorld = () => {
   };
 
   const api = {
+    reset,
     copy,
     updateCamera,
     step,
