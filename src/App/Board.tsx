@@ -2,12 +2,9 @@ import * as React from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "react-three-fiber";
 import { Dice } from "./Dice";
-import { createWorld } from "../game/physicalWorld";
+import { createWorld, nDice } from "../game/physicalWorld";
 
 type Props = { placed: boolean; onPlace: () => void };
-
-const z = new THREE.Vector3();
-const mat3 = new THREE.Matrix3();
 
 export const Board = ({}: Props) => {
   const dicesRef = React.useRef<THREE.Object3D>();
@@ -15,23 +12,15 @@ export const Board = ({}: Props) => {
   const [world] = React.useState(createWorld);
 
   useFrame(({ camera }, dt) => {
-    {
-      mat3.setFromMatrix4(camera.matrixWorld).invert();
-      world.cameraRotationMatrix.copy(mat3 as any);
-      world.cameraPosition.copy(camera.position as any);
-      camera.getWorldDirection(z);
-      world.cameraDirection.copy(z as any);
-    }
+    world.updateCamera(camera);
 
-    world.step(Math.min((1 / 60) * 5, dt));
+    const clampDt = Math.min((1 / 60) * 5, dt);
 
-    if (dicesRef.current?.children[0]) {
-      for (let i = 0; i < world.dices.length; i++) {
-        const { position, quaternion } = world.dices[i];
-        const object = dicesRef.current.children[i];
-        object.position.copy(position as any);
-        object.setRotationFromQuaternion(quaternion as any);
-      }
+    world.step(clampDt);
+
+    for (let i = nDice; i--; ) {
+      const object = dicesRef.current?.children?.[i];
+      if (object) world.copy(i, object);
     }
   });
 
@@ -76,7 +65,7 @@ export const Board = ({}: Props) => {
       <Ground />
 
       <group ref={dicesRef}>
-        {world.dices.map((_, i) => (
+        {Array.from({ length: nDice }).map((_, i) => (
           <Dice
             key={i}
             onClick={toggle(i)}

@@ -10,6 +10,7 @@
     "cannon-es": "0.16.0",
     "cannon-es-debugger": "0.1.1",
     "drei": "2.2.17",
+    "nanoevents": "5.1.10",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-three-fiber": "5.3.14",

@@ -1,5 +1,4 @@
 import * as React from "react";
-import { loadXR8 } from "../XR8Canvas/getXR8";
 
 // import LazyApp from "./App";
 const LazyApp = React.lazy(() => import("./App"));
