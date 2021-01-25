@@ -31,8 +31,6 @@ export const PageRules = ({ onClose, loading }: Props) => (
       <Dice style={{ marginLeft: "10px" }} value={6} />
     </div>
 
-    <Hand />
-
     <p>
       <i>
         A pretty cool{" "}

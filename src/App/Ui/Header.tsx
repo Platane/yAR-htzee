@@ -15,6 +15,7 @@ export const Header = ({ k, status, roll, toggleDiceReroll }: Props) => (
       display: "flex",
       flexDirection: "row",
       justifyContent: "center",
+      alignItems: "center",
       padding: "10px",
     }}
   >
@@ -25,5 +26,11 @@ export const Header = ({ k, status, roll, toggleDiceReroll }: Props) => (
         onClick={status === "picking" ? () => toggleDiceReroll(i) : undefined}
       />
     ))}
+
+    {roll && (
+      <span style={{ marginLeft: "10px" }}>
+        {`${Math.max(0, 3 - k)} re-roll left`}
+      </span>
+    )}
   </div>
 );

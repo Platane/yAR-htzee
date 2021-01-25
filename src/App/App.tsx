@@ -9,10 +9,25 @@ import { useStore } from "./useGame";
 import { Overlay } from "./Ui/Overlay";
 import { Ground } from "./Scene/Ground";
 import { Header } from "./Ui/Header";
+import { ThrowHint } from "./Ui/Hints/ThrowHint";
+import { PickHint } from "./Ui/Hints/PickHint";
+import { PullHint } from "./Ui/Hints/PullHint";
+import { useDelay } from "./Ui/useDeay";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
 type Props = { onReady: () => void; started: boolean };
+
+const useHint = ({ status, k, dicesToReroll, roundKey }: any) => {
+  if (roundKey > 1 || k > 1) return null;
+
+  if (status === "pre-roll") return "throw" as const;
+
+  if (status === "picking") {
+    if (dicesToReroll.length === 0) return "pick" as const;
+    else return "pull" as const;
+  }
+};
 
 export const App = ({ onReady, started }: Props) => {
   const [error, setError] = React.useState<Error>();
@@ -32,6 +47,9 @@ export const App = ({ onReady, started }: Props) => {
     toggleDiceReroll,
     onRollStatusChanged,
   } = useStore();
+
+  const h = useHint({ k, status, roundKey, dicesToReroll });
+  const hint = useDelay(!scoreSheetOpened && started && h, 2000);
 
   const [rendererReady, setRendererReady] = React.useState(false);
   {
@@ -81,42 +99,48 @@ export const App = ({ onReady, started }: Props) => {
       </VersatileCanvas>
 
       {started && (
-        <Header
-          k={k}
-          status={status}
-          roll={roll}
-          toggleDiceReroll={toggleDiceReroll}
-        />
-      )}
-
-      {started && !scoreSheetOpened && (
-        <button
-          style={{
-            position: "absolute",
-            width: "160px",
-            height: "40px",
-            bottom: "10px",
-            right: "10px",
-            zIndex: 1,
-          }}
-          onClick={openScoreSheet}
-        >
-          score sheet
-        </button>
-      )}
-
-      {started && scoreSheetOpened && (
-        <Overlay>
-          <ScoreSheet
-            style={{ width: "calc( 100% - 40px )", maxWidth: "600px" }}
-            scoreSheet={scoreSheet}
-            onClose={closeScoreSheet}
-            onSelectCategory={
-              status === "picking" ? selectCategoryForRoll : undefined
-            }
-            rollCandidate={roll}
+        <>
+          <Header
+            k={k}
+            status={status}
+            roll={roll}
+            toggleDiceReroll={toggleDiceReroll}
           />
-        </Overlay>
+
+          {!scoreSheetOpened && (
+            <button
+              style={{
+                position: "absolute",
+                width: "160px",
+                height: "40px",
+                bottom: "10px",
+                right: "10px",
+                zIndex: 1,
+              }}
+              onClick={openScoreSheet}
+            >
+              score sheet
+            </button>
+          )}
+
+          {scoreSheetOpened && (
+            <Overlay>
+              <ScoreSheet
+                style={{ width: "calc( 100% - 40px )", maxWidth: "600px" }}
+                scoreSheet={scoreSheet}
+                onClose={closeScoreSheet}
+                onSelectCategory={
+                  status === "picking" ? selectCategoryForRoll : undefined
+                }
+                rollCandidate={roll}
+              />
+            </Overlay>
+          )}
+
+          {hint === "throw" && <ThrowHint />}
+          {hint === "pick" && <PickHint />}
+          {hint === "pull" && <PullHint />}
+        </>
       )}
     </>
   );

@@ -40,9 +40,20 @@ export const useStore = create<State & Api>((set) => ({
   openScoreSheet: () => set({ scoreSheetOpened: true }),
   closeScoreSheet: () => set({ scoreSheetOpened: false }),
 
+  reset: () =>
+    set((state) => ({
+      roundKey: state.roundKey + 1,
+      roll: null,
+      dicesToReroll: [...fullReroll],
+      scoreSheetOpened: false,
+      scoreSheet: { ...emptyScoreSheet },
+      k: 0,
+      status: "pre-roll",
+    })),
+
   toggleDiceReroll: (i) =>
     set((state) => {
-      if (state.status !== "picking") return {};
+      if (state.status !== "picking" || state.k >= 3) return {};
 
       return {
         dicesToReroll: state.dicesToReroll.includes(i)
@@ -53,8 +64,9 @@ export const useStore = create<State & Api>((set) => ({
 
   onRollStatusChanged: (status, roll) =>
     set(({ k }) => {
-      if (status === "picking")
-        return { status, roll, dicesToReroll: [], k: k + 1 };
+      if (status === "rolling") return { status, k: k + 1 };
+
+      if (status === "picking") return { status, roll, dicesToReroll: [] };
 
       return { status };
     }),
