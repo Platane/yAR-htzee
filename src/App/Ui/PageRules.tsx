@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Dice } from "./Dice";
+import { Hand } from "./Hints/Hand";
 
 type Props = { onClose: () => void; loading: boolean };
 
@@ -9,7 +10,8 @@ export const PageRules = ({ onClose, loading }: Props) => (
       padding: "10px",
       display: "flex",
       flexDirection: "column",
-      height: "100%",
+      position: "relative",
+      zIndex: 2,
     }}
   >
     <h1 style={{ alignSelf: "center" }}>yAR-htzee</h1>
@@ -29,6 +31,8 @@ export const PageRules = ({ onClose, loading }: Props) => (
       <Dice style={{ marginLeft: "10px" }} value={6} />
     </div>
 
+    <Hand />
+
     <p>
       <i>
         A pretty cool{" "}
@@ -41,17 +45,21 @@ export const PageRules = ({ onClose, loading }: Props) => (
 
     <p>This game is about making combination with 5 dices.</p>
 
-    <p>You get to roll the dices, and re-roll any dice you want two times.</p>
+    <p>
+      You get to roll the dices, and re-roll any number of dice you want two
+      times.
+    </p>
 
     <p>
-      Pick one of the combination with the roll, some awards more points than
-      others.
+      Then pick one of the combinations, some awards more points than others.
     </p>
 
     <p>
       There is 13 rounds, after which you should have filled your score sheet
       with every of the 13 combinations.
     </p>
+
+    <p>Sum all combinations points and replay to beat your score!</p>
 
     <h2>About</h2>
 
