@@ -43,8 +43,9 @@ export const getScore = (category: Category, set: number[]) => {
 const maxChainLength = (set: number[]) =>
   Math.max(...set.map((u) => lengthOfChainStartingWith(u, set)));
 
-const lengthOfChainStartingWith = (n: number, set: number[]) => {
-  if (set.some((u) => u === n)) lengthOfChainStartingWith(n + 1, set);
+const lengthOfChainStartingWith = (n: number, set: number[]): number => {
+  if (set.some((u) => u === n))
+    return 1 + lengthOfChainStartingWith(n + 1, set);
   return 0;
 };
 

@@ -16,6 +16,7 @@ jobs:
 
       - run: yarn type
       - run: yarn lint
+      - run: yarn test
       - run: yarn build
       - run: yarn surge ./build yAR-htzee-platane.surge.sh
         env:
