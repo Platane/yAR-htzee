@@ -1,18 +1,24 @@
 import * as React from "react";
+import { PageRules } from "./Ui/PageRules";
 
 // import LazyApp from "./App";
 const LazyApp = React.lazy(() => import("./App"));
 
 export const Boot = () => {
   const [ready, setReady] = React.useState(false);
+  const [started, setStarted] = React.useState(false);
 
   return (
     <ErrorBoundary>
       <React.Suspense fallback={null}>
-        <LazyApp onReady={() => setReady(true)} />
+        <LazyApp onReady={() => setReady(true)} started={started} />
       </React.Suspense>
 
-      {!ready && (
+      {!started && (
+        <PageRules loading={!ready} onClose={() => setStarted(true)} />
+      )}
+
+      {!ready && false && (
         <div
           style={{
             position: "fixed",

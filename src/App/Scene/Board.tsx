@@ -30,10 +30,7 @@ export const Board = ({
     world.setPickedDice(dicesToReroll ?? []);
   }, [world, dicesToReroll]);
 
-  React.useEffect(() => {
-    debugger;
-    world.reset();
-  }, [roundKey]);
+  React.useEffect(world.reset, [roundKey]);
 
   return (
     <>

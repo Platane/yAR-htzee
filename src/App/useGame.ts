@@ -8,7 +8,7 @@ const emptyScoreSheet = Object.fromEntries(
 
 const fullReroll = Array.from({ length: nDice }, (_, i) => i);
 
-type Api = {
+export type Api = {
   openScoreSheet: () => void;
   closeScoreSheet: () => void;
   selectCategoryForRoll: (category: Category) => void;
@@ -18,7 +18,7 @@ type Api = {
     roll?: DiceRoll
   ) => void;
 };
-type State = {
+export type State = {
   roundKey: number;
   scoreSheetOpened: boolean;
   scoreSheet: ScoreSheet;
@@ -42,8 +42,6 @@ export const useStore = create<State & Api>((set) => ({
 
   toggleDiceReroll: (i) =>
     set((state) => {
-      debugger;
-
       if (state.status !== "picking") return {};
 
       return {

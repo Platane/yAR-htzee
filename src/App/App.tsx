@@ -4,17 +4,17 @@ import { Board } from "./Scene/Board";
 import * as THREE from "three";
 import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
 import { Target } from "./Scene/Target";
-import { Dice } from "./Ui/Dice";
 import { ScoreSheet } from "./Ui/ScoreSheet/ScoreSheet";
 import { useStore } from "./useGame";
 import { Overlay } from "./Ui/Overlay";
 import { Ground } from "./Scene/Ground";
+import { Header } from "./Ui/Header";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
-type Props = { onReady: () => void };
+type Props = { onReady: () => void; started: boolean };
 
-export const App = ({ onReady }: Props) => {
+export const App = ({ onReady, started }: Props) => {
   const [error, setError] = React.useState<Error>();
   if (error) throw error;
 
@@ -34,11 +34,11 @@ export const App = ({ onReady }: Props) => {
   } = useStore();
 
   const [rendererReady, setRendererReady] = React.useState(false);
-  const { active } = useProgress();
-  const ready = rendererReady && !active;
-  React.useEffect(() => {
-    if (ready) onReady();
-  }, [ready]);
+  {
+    const { active } = useProgress();
+    const r = rendererReady && !active;
+    React.useEffect(() => void (r && onReady()), [r]);
+  }
 
   return (
     <>
@@ -56,7 +56,8 @@ export const App = ({ onReady }: Props) => {
           left: 0,
           right: 0,
           bottom: 0,
-          opacity: ready ? 1 : 0,
+          opacity: started ? 1 : 0,
+          touchAction: "none",
         }}
       >
         <ErrorBoundary onError={setError}>
@@ -78,25 +79,40 @@ export const App = ({ onReady }: Props) => {
         </ErrorBoundary>
       </VersatileCanvas>
 
-      {ready && (
-        <div style={{ position: "absolute", left: 0, top: "48px", zIndex: 1 }}>
-          {roundKey} {k} {status}
-          {roll?.map((x: any, i: number) => (
-            <Dice key={i} value={x} />
-          ))}
-          {!scoreSheetOpened && (
-            <button onClick={openScoreSheet}>score sheet</button>
-          )}
-        </div>
+      {started && (
+        <Header
+          k={k}
+          status={status}
+          roll={roll}
+          toggleDiceReroll={toggleDiceReroll}
+        />
       )}
 
-      {ready && scoreSheetOpened && (
+      {started && !scoreSheetOpened && (
+        <button
+          style={{
+            position: "absolute",
+            width: "160px",
+            height: "40px",
+            bottom: "10px",
+            right: "10px",
+            zIndex: 1,
+          }}
+          onClick={openScoreSheet}
+        >
+          score sheet
+        </button>
+      )}
+
+      {started && scoreSheetOpened && (
         <Overlay>
           <ScoreSheet
             style={{ width: "calc( 100% - 40px )", maxWidth: "600px" }}
             scoreSheet={scoreSheet}
             onClose={closeScoreSheet}
-            onSelectCategory={selectCategoryForRoll}
+            onSelectCategory={
+              status === "picking" ? selectCategoryForRoll : undefined
+            }
             rollCandidate={roll}
           />
         </Overlay>
