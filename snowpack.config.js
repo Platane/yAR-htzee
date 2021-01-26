@@ -9,6 +9,8 @@ module.exports = {
     //
     "@snowpack/plugin-typescript",
 
+    "@snowpack/plugin-webpack",
+
     // [
     //   "@snowpack/plugin-webpack",
     //   {
@@ -46,11 +48,11 @@ module.exports = {
 
   devOptions: { secure: true },
 
-  optimize: {
-    bundle: true,
-    minify: true,
-    splitting: true,
-    treeshake: true,
-    target: "es2018",
-  },
+  // optimize: {
+  //   bundle: true,
+  //   minify: true,
+  //   splitting: true,
+  //   treeshake: true,
+  //   target: "es2018",
+  // },
 };
