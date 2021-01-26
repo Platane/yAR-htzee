@@ -4,9 +4,9 @@ import { createNanoEvents, Emitter } from "nanoevents";
 import * as THREE from "three";
 import { MathUtils } from "three";
 
-const stepDuration = 1 / 60;
+const stepDuration = 2 / 60;
 
-const worldSimulationSpeed = 3;
+const worldSimulationSpeed = 4;
 
 const springParams = { tension: 120, friction: 12 };
 
@@ -73,7 +73,7 @@ export const createWorld = () => {
         edge: {
           position: o
             .scale(1.6)
-            .addScaledVector(-4 + 2 * Math.random(), CANNON.Vec3.UNIT_Z),
+            .addScaledVector(-3 + 2 * Math.random(), CANNON.Vec3.UNIT_Z),
           quaternion: new CANNON.Quaternion().setFromEuler(
             Math.random() * Math.PI * 2,
             Math.random() * Math.PI * 2,
@@ -178,12 +178,14 @@ export const createWorld = () => {
       cameraRotationMatrix.vmult(forceDirection, forceDirection);
       forceDirection.y = 0;
       forceDirection.normalize();
+      forceDirection.y = -0.6;
+      forceDirection.normalize();
 
       dice.applyImpulse(
-        forceDirection.scale(-1.3),
+        forceDirection.scale(-0.8),
         new CANNON.Vec3(Math.random() - 0.5, Math.random() - 0.5, 0.9)
       );
-      dice.applyForce(forceDirection.scale(-70), new CANNON.Vec3(0, 0, 0));
+      dice.applyForce(forceDirection.scale(-35), new CANNON.Vec3(0, 0, 0));
     }
 
     pushSpring.target = 0;
