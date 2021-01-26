@@ -108,6 +108,9 @@ export const PullHint = () => {
         />
         <div
           style={{
+            textAlign: "center",
+            padding: "10px",
+            fontWeight: "bold",
             fontSize: "2em",
             color: "#fff",
             textShadow: "1px 1px 4px black, -1px -1px 4px black",

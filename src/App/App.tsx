@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Environment, Stats, useProgress } from "drei";
+import { Environment, useProgress } from "drei";
 import { Board } from "./Scene/Board";
 import * as THREE from "three";
 import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
@@ -13,6 +13,7 @@ import { ThrowHint } from "./Ui/Hints/ThrowHint";
 import { PickHint } from "./Ui/Hints/PickHint";
 import { PullHint } from "./Ui/Hints/PullHint";
 import { useDelay } from "./Ui/useDeay";
+import { GithubLogo } from "./Ui/GithubLogo";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
@@ -46,6 +47,7 @@ export const App = ({ onReady, started }: Props) => {
     selectCategoryForRoll,
     toggleDiceReroll,
     onRollStatusChanged,
+    reset,
   } = useStore();
 
   const h = useHint({ k, status, roundKey, dicesToReroll });
@@ -60,8 +62,6 @@ export const App = ({ onReady, started }: Props) => {
 
   return (
     <>
-      <Stats />
-
       <VersatileCanvas
         xr8ApiKey={xr8ApiKey}
         onReady={() => setRendererReady(true)}
@@ -114,7 +114,7 @@ export const App = ({ onReady, started }: Props) => {
                 width: "160px",
                 height: "40px",
                 bottom: "10px",
-                right: "10px",
+                right: "60px",
                 zIndex: 1,
               }}
               onClick={openScoreSheet}
@@ -122,6 +122,21 @@ export const App = ({ onReady, started }: Props) => {
               score sheet
             </button>
           )}
+
+          <a href="https://github.com/platane/yAR-htzee" title="github">
+            <button
+              style={{
+                position: "absolute",
+                width: "40px",
+                height: "40px",
+                bottom: "10px",
+                right: "10px",
+                zIndex: 1,
+              }}
+            >
+              <GithubLogo />
+            </button>
+          </a>
 
           {scoreSheetOpened && (
             <Overlay>
@@ -133,6 +148,7 @@ export const App = ({ onReady, started }: Props) => {
                   status === "picking" ? selectCategoryForRoll : undefined
                 }
                 rollCandidate={roll}
+                reset={reset}
               />
             </Overlay>
           )}

@@ -59,24 +59,6 @@ export const PageRules = ({ onClose, loading }: Props) => (
 
     <p>Sum all combinations points and replay to beat your score!</p>
 
-    <h2>About</h2>
-
-    <p>
-      Made by <a href="https://github.com/Platane">platane</a>
-    </p>
-
-    <p>
-      <a href="https://skfb.ly/6RtsC">Dice model</a> by tnRaro, licensed under{" "}
-      <a href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-      <br />
-      <a href="https://hdrihaven.com/hdri/?c=indoor&h=lebombo">Hdri map</a> by
-      Greg Zaal, licensed under{" "}
-      <a href="https://creativecommons.org/share-your-work/public-domain/cc0/">
-        CC0
-      </a>
-      .
-    </p>
-
     <button
       style={{
         width: "160px",

@@ -13,18 +13,18 @@ module.exports = {
     //   "@snowpack/plugin-webpack",
     //   {
     //     extendConfig: (config) => {
-    //       config.target = "node";
+    //       // config.target = "node";
 
-    //       config.optimization.splitChunks.maxSize = 2000000;
+    //       // config.optimization.splitChunks.maxSize = 2000000;
 
-    //       config.optimization.splitChunks.cacheGroups = undefined;
-    //       config.optimization.minimizer = undefined;
+    //       // config.optimization.splitChunks.cacheGroups = undefined;
+    //       // config.optimization.minimizer = undefined;
 
     //       config.output.publicPath = "";
     //       config.output.filename = "[id]-[contentHash:4].js";
 
-    //       config.output.libraryTarget = "commonjs";
-    //       config.output.library = "aaaa";
+    //       // config.output.libraryTarget = "commonjs";
+    //       // config.output.library = "aaaa";
 
     //       return config;
     //     },
@@ -47,8 +47,8 @@ module.exports = {
   devOptions: { secure: true },
 
   optimize: {
-    bundle: false,
-    minify: false,
+    bundle: true,
+    minify: true,
     splitting: true,
     treeshake: true,
     target: "es2018",
