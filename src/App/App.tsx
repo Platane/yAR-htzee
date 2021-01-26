@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Environment, useProgress } from "drei";
+import { Environment, useDetectGPU, useProgress } from "drei";
 import { Board } from "./Scene/Board";
 import * as THREE from "three";
 import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
@@ -12,7 +12,7 @@ import { Header } from "./Ui/Header";
 import { ThrowHint } from "./Ui/Hints/ThrowHint";
 import { PickHint } from "./Ui/Hints/PickHint";
 import { PullHint } from "./Ui/Hints/PullHint";
-import { useDelay } from "./Ui/useDeay";
+import { useDelay } from "./Ui/useDelay";
 import { GithubLogo } from "./Ui/GithubLogo";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
@@ -51,8 +51,13 @@ export const App = ({ onReady, started }: Props) => {
   } = useStore();
 
   const h = useHint({ k, status, roundKey, dicesToReroll });
-  const hint = useDelay(!scoreSheetOpened && started && h, 2000);
+  const dicesToRerollStable = !!useDelay(dicesToReroll, 1000);
+  const hint = useDelay(
+    !scoreSheetOpened && started && dicesToRerollStable && h,
+    2000
+  );
 
+  const { tier } = useDetectGPU() ?? {};
   const [rendererReady, setRendererReady] = React.useState(false);
   {
     const { active } = useProgress();
@@ -80,11 +85,11 @@ export const App = ({ onReady, started }: Props) => {
         }}
       >
         <ErrorBoundary onError={setError}>
-          <directionalLight position={[10, 8, 6]} intensity={0} castShadow />
           <React.Suspense fallback={null}>
             <Environment path={"assets/"} files={"lebombo_1k.hdr"} />
 
             <Board
+              status={status}
               roundKey={roundKey}
               onStatusChanged={onRollStatusChanged}
               dicesToReroll={dicesToReroll}
@@ -92,9 +97,11 @@ export const App = ({ onReady, started }: Props) => {
             />
           </React.Suspense>
 
-          <Ground />
+          <directionalLight position={[10, 8, 6]} intensity={0} castShadow />
 
           <Target />
+
+          <Ground />
         </ErrorBoundary>
       </VersatileCanvas>
 

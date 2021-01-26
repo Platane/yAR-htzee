@@ -17,18 +17,28 @@ export const Header = ({ k, status, roll, toggleDiceReroll }: Props) => (
       justifyContent: "center",
       alignItems: "center",
       padding: "10px",
+      pointerEvents: "none",
     }}
   >
     {roll?.map((x: any, i: number) => (
       <Dice
         key={i}
         value={x}
-        onClick={status === "picking" ? () => toggleDiceReroll(i) : undefined}
+        style={{ pointerEvents: status === "picking" ? "auto" : "none" }}
+        onClick={() => toggleDiceReroll(i)}
       />
     ))}
 
     {roll && (
-      <span style={{ marginLeft: "10px" }}>
+      <span
+        style={{
+          marginLeft: "10px",
+          fontSize: "1.2em",
+          color: "#fff",
+          textShadow: "1px 1px 4px black, -1px -1px 4px black",
+          pointerEvents: "none",
+        }}
+      >
         {`${Math.max(0, 3 - k)} re-roll left`}
       </span>
     )}

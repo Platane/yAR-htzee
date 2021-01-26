@@ -4,7 +4,9 @@ import { useFrame, useThree } from "react-three-fiber";
 import { createWorld, nDice } from "../../game/physicalWorld";
 
 export const useWorld = (
-  dicesRef: React.MutableRefObject<THREE.Object3D | undefined>
+  dicesRef: React.MutableRefObject<THREE.Object3D | undefined>,
+  hintsRef: React.MutableRefObject<THREE.Object3D | undefined>,
+  onDragChanged?: (dragged: boolean) => void
 ) => {
   // instantiate the world
   const [world] = React.useState(createWorld);
@@ -17,8 +19,10 @@ export const useWorld = (
     world.step(dt);
 
     for (let i = nDice; i--; ) {
-      const object = dicesRef.current?.children?.[i];
-      if (object) world.copy(i, object);
+      world.copy(i, dicesRef.current?.children?.[i]);
+
+      world.copy(i, hintsRef.current?.children?.[i]);
+      hintsRef.current?.children?.[i].rotation.set(0, 0, 0);
     }
   });
 
@@ -36,11 +40,14 @@ export const useWorld = (
 
       const dy = (y - anchor.y) / domElement.clientHeight;
 
+      if (Math.abs(dy) > 0.1) onDragChanged?.(true);
+
       world.setPullX(dy);
     };
     const onUp = (_p: PointerEvent) => {
       anchor = null;
       world.release();
+      onDragChanged?.(false);
     };
 
     domElement.addEventListener("pointerdown", onDown);

@@ -180,14 +180,10 @@ export const createWorld = () => {
       forceDirection.normalize();
 
       dice.applyImpulse(
-        forceDirection.scale(-1),
-        new CANNON.Vec3(
-          Math.random() - 0.5,
-          Math.random() - 0.5,
-          Math.random() - 0.5
-        )
+        forceDirection.scale(-1.3),
+        new CANNON.Vec3(Math.random() - 0.5, Math.random() - 0.5, 0.9)
       );
-      dice.applyForce(forceDirection.scale(-80), new CANNON.Vec3(0, 0, 0));
+      dice.applyForce(forceDirection.scale(-70), new CANNON.Vec3(0, 0, 0));
     }
 
     pushSpring.target = 0;
@@ -236,7 +232,9 @@ export const createWorld = () => {
     cameraPosition.vadd(target, target);
   };
 
-  const copy = (i: number, target: THREE.Object3D) => {
+  const copy = (i: number, target?: THREE.Object3D) => {
+    if (!target) return;
+
     const dice = dices[i];
 
     if (status === "rolling" || !dice.picked) {
