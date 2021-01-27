@@ -18,9 +18,11 @@ export const loadXR8 = (apiKey: string) => {
 };
 let globalLoadPromise: Promise<XR8>;
 
+const xr8Hosted = window.location.host.endsWith("8thwall.app");
+
 const internalLoadXR8 = async (apiKey: string) => {
   // in 8thwall demo page, the script is loaded automatically
-  if (!window.location.host.endsWith("8thwall.app")) {
+  if (!xr8Hosted) {
     const src = `//apps.8thwall.com/xrweb?appKey=${apiKey}`;
     await loadScript(src);
   }

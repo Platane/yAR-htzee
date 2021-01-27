@@ -19,7 +19,14 @@ export const ScaleOnPulse = ({ pulse, children }: Props) => {
     stepSpring(spring.current, springParams, spring.current.target, dt);
 
     if (spring.current.x > 1) spring.current.target = 0;
-    ref.current?.scale.setScalar(Math.max(0.001, 1 + spring.current.x * 0.16));
+
+    const object = ref.current;
+    if (object) {
+      const s = 1 + spring.current.x * 0.16;
+
+      object.scale.setScalar(Math.max(0.001, s));
+      object.position.y = s - 1;
+    }
   });
 
   return <group ref={ref}>{children}</group>;

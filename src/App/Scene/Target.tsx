@@ -31,7 +31,7 @@ export const Target = () => {
       <circleBufferGeometry args={[2, 32]} />
       <meshPhysicalMaterial
         color={"orange"}
-        opacity={0.2}
+        opacity={0.4}
         metalness={0}
         roughness={0}
         transparent
