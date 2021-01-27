@@ -65,6 +65,11 @@ const InsideCanvas = ({
     let trackingReadyCalled = false;
     let xr8: XR8;
 
+    const onBlur = () => xr8?.pause();
+    const onFocus = () => xr8?.resume();
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("focus", onFocus);
+
     loadXR8(xr8ApiKey)
       .then((x) => {
         if (canceled) return;
@@ -76,6 +81,7 @@ const InsideCanvas = ({
           //
           xr8.GlTextureRenderer.pipelineModule(),
           xr8.XrController.pipelineModule(),
+
           {
             name: "custom-three-fiber",
             onException: onError,
@@ -150,6 +156,8 @@ const InsideCanvas = ({
     return () => {
       canceled = true;
       xr8?.stop();
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("focus", onFocus);
     };
   }, [canvas, xr8ApiKey]);
 

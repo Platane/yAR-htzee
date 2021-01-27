@@ -113,6 +113,7 @@ export type XR8Pipeline = {
     stream?: MediaStream;
   }) => void;
 
+  onAttach?: (o: { framework: any }) => void;
   onDetach?: (o: { framework: any }) => void;
 
   onUpdate?: (o: {
