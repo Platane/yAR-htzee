@@ -11,7 +11,7 @@
 yarn
 ```
 
-Be sure to have your 8thwall api key as env `XR8_API_KEY` . Or use a .env file.
+Be sure to have your 8thwall api key as env `XR8_API_KEY` . Or use a .env file. Or embed the app inside 8thwall sandbox.
 
 # Usage
 
