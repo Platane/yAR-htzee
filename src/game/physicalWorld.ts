@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { MathUtils } from "three";
 import { getDiceUpFace } from "./getDiceUpFace";
 import { nDice } from "./types";
+import { getPhysicalHand } from "./physicalHand";
 
 const stepDuration = 2 / 60;
 
@@ -37,7 +38,7 @@ export const createWorld = () => {
   // dices
   const diceShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
   const dices = Array.from({ length: nDice }, (_, i) => {
-    const body: any = new CANNON.Body({
+    const body = new CANNON.Body({
       mass: 1,
       position: new CANNON.Vec3((i - length / 2) * 1.2),
     });
@@ -67,6 +68,13 @@ export const createWorld = () => {
         ),
       }),
     });
+  });
+
+  getPhysicalHand(dices as any).inHand.forEach((t, i) => {
+    dices[i].inHand.position.copy(
+      t.position.vadd(new CANNON.Vec3(0, -1.25, -2.2))
+    );
+    dices[i].inHand.quaternion.copy(t.quaternion);
   });
 
   // state
