@@ -1,11 +1,11 @@
 import * as React from "react";
 import * as THREE from "three";
 import { Dice } from "./Dice";
-import { nDice } from "../../game/physicalWorld";
 import { useWorld } from "./useWorld";
 import { SelectedDiceHint } from "./SelectedDiceHint";
 import { ScaleOnPulse } from "./ScaleOnPulse";
 import { useDelay } from "../Ui/useDelay";
+import { nDice } from "../../game/types";
 
 type Props = {
   status: any;

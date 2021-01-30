@@ -3,6 +3,8 @@ import { stepSpring } from "./spring";
 import { createNanoEvents, Emitter } from "nanoevents";
 import * as THREE from "three";
 import { MathUtils } from "three";
+import { getDiceUpFace } from "./getDiceUpFace";
+import { nDice } from "./types";
 
 const stepDuration = 2 / 60;
 
@@ -10,86 +12,65 @@ const worldSimulationSpeed = 4;
 
 const springParams = { tension: 120, friction: 12 };
 
-export const nDice = 5;
-
 export const createWorld = () => {
+  // world
   const world = new CANNON.World();
   world.gravity.set(0, -1, 0);
   world.broadphase = new CANNON.NaiveBroadphase();
 
   // ground
-  let ground: CANNON.Body;
-  {
-    const planeShape = new CANNON.Plane();
-    ground = new CANNON.Body({
-      mass: 0,
-      type: CANNON.BODY_TYPES.STATIC,
-    });
-    const quat = new CANNON.Quaternion().setFromAxisAngle(
+  const groundShape = new CANNON.Plane();
+  const ground = new CANNON.Body({
+    mass: 0,
+    type: CANNON.BODY_TYPES.STATIC,
+  });
+  ground.addShape(
+    groundShape,
+    new CANNON.Vec3(0, 0, 0),
+    new CANNON.Quaternion().setFromAxisAngle(
       new CANNON.Vec3(1, 0, 0),
       -Math.PI / 2
-    );
-    const position = new CANNON.Vec3(0, 0, 0);
-    ground.addShape(planeShape, position, quat);
-    world.addBody(ground);
-  }
+    )
+  );
+  world.addBody(ground);
 
   // dices
-  type Pose = { position: CANNON.Vec3; quaternion: CANNON.Quaternion };
-  const dices: (CANNON.Body & {
-    pull: { edge: Pose; inHand: Pose; spring: CANNON.Spring };
-    picked: boolean;
-  })[] = [];
-  {
-    const size = new CANNON.Vec3(0.5, 0.5, 0.5);
-    const shape = new CANNON.Box(size);
-    for (let n = nDice; n--; ) {
-      const body: any = new CANNON.Body({
-        mass: 1,
-        position: new CANNON.Vec3((n % 3) - 1, 0.5, Math.floor(n / 3)),
-      });
-      body.addShape(shape);
-      world.addBody(body);
+  const diceShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
+  const dices = Array.from({ length: nDice }, (_, i) => {
+    const body: any = new CANNON.Body({
+      mass: 1,
+      position: new CANNON.Vec3((i - length / 2) * 1.2),
+    });
+    body.addShape(diceShape);
+    world.addBody(body);
 
-      const o = new CANNON.Vec3((n % 3) - 1, Math.floor(n / 3), 0);
+    const o = new CANNON.Vec3((i % 3) - 1, Math.floor(i / 3), 0);
 
-      body.pull = {
-        spring: new CANNON.Spring(body, ground, {
-          localAnchorA: new CANNON.Vec3(),
-          localAnchorB: new CANNON.Vec3(),
-          restLength: 0,
-          stiffness: 100,
-          damping: 100,
-        }),
-
-        inHand: {
-          position: o.scale(0.5).vadd(new CANNON.Vec3(0, -1.7, -2)),
-          quaternion: new CANNON.Quaternion().setFromEuler(
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2
-          ),
-        },
-        edge: {
-          position: o
-            .scale(1.6)
-            .addScaledVector(-3 + 2 * Math.random(), CANNON.Vec3.UNIT_Z),
-          quaternion: new CANNON.Quaternion().setFromEuler(
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2
-          ),
-        },
-      };
-
-      dices.push(body);
-    }
-  }
+    return Object.assign(body, {
+      picked: true,
+      inHand: new CANNON.Transform({
+        position: o.scale(0.5).vadd(new CANNON.Vec3(0, -1.7, -2)),
+        quaternion: new CANNON.Quaternion().setFromEuler(
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2
+        ),
+      }),
+      edge: new CANNON.Transform({
+        position: o
+          .scale(1.6)
+          .addScaledVector(-3 + 2 * Math.random(), CANNON.Vec3.UNIT_Z),
+        quaternion: new CANNON.Quaternion().setFromEuler(
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2
+        ),
+      }),
+    });
+  });
 
   // state
-  const cameraPosition = new CANNON.Vec3();
-  const cameraDirection = new CANNON.Vec3();
-  const cameraRotationMatrix = new CANNON.Mat3();
+  const cameraTransform = new CANNON.Transform();
 
   // x=0  -> dice is on the board
   // x=1  -> dice is in hand
@@ -139,7 +120,7 @@ export const createWorld = () => {
         ee.emit(
           "status-changed",
           status,
-          dices.map((d) => getUpFace(d.quaternion))
+          dices.map((d) => getDiceUpFace(d.quaternion))
         );
       }
 
@@ -164,10 +145,9 @@ export const createWorld = () => {
     for (const dice of dices) {
       if (!dice.picked) continue;
 
-      cameraLocalToWorld(dice.pull.inHand.position, inHand);
-      cameraLocalToWorld(dice.pull.edge.position, pushEdge);
+      cameraTransform.pointToWorld(dice.inHand.position, inHand);
+      cameraTransform.pointToWorld(dice.edge.position, pushEdge);
 
-      E.copy(CANNON.Vec3.ZERO);
       E.copy(inHand);
       E.lerp(dice.position, 1 - pullSpring.x, E);
       E.lerp(pushEdge, pushSpring.x, E);
@@ -175,7 +155,8 @@ export const createWorld = () => {
       dice.position.copy(E);
 
       const forceDirection = CANNON.Vec3.UNIT_Z.clone();
-      cameraRotationMatrix.vmult(forceDirection, forceDirection);
+
+      cameraTransform.quaternion.vmult(forceDirection, forceDirection);
       forceDirection.y = 0;
       forceDirection.normalize();
       forceDirection.y = -0.6;
@@ -228,12 +209,6 @@ export const createWorld = () => {
   const pushEdge = new CANNON.Vec3();
   const E = new CANNON.Vec3();
 
-  const cameraLocalToWorld = (A: CANNON.Vec3, target: CANNON.Vec3) => {
-    target.copy(A);
-    cameraRotationMatrix.vmult(target, target);
-    cameraPosition.vadd(target, target);
-  };
-
   const copy = (i: number, target?: THREE.Object3D) => {
     if (!target) return;
 
@@ -245,10 +220,9 @@ export const createWorld = () => {
 
       //
     } else if (status === "picking" || status === "pre-roll") {
-      cameraLocalToWorld(dice.pull.inHand.position, inHand);
-      cameraLocalToWorld(dice.pull.edge.position, pushEdge);
+      cameraTransform.pointToWorld(dice.inHand.position, inHand);
+      cameraTransform.pointToWorld(dice.edge.position, pushEdge);
 
-      E.copy(CANNON.Vec3.ZERO);
       E.copy(inHand);
       E.lerp(dice.position, 1 - pullSpring.x, E);
       E.lerp(pushEdge, pushSpring.x, E);
@@ -256,23 +230,18 @@ export const createWorld = () => {
       target.position.copy(E as any);
 
       const Eq = new CANNON.Quaternion();
-      Eq.copy(dice.pull.inHand.quaternion);
+      Eq.copy(dice.inHand.quaternion);
       Eq.slerp(dice.quaternion, 1 - pullSpring.x, Eq);
-      Eq.slerp(dice.pull.edge.quaternion, pushSpring.x, Eq);
+      Eq.slerp(dice.edge.quaternion, pushSpring.x, Eq);
 
       target.setRotationFromQuaternion(Eq as any);
       //
     }
   };
 
-  const z = new THREE.Vector3();
-  const mat3 = new THREE.Matrix3();
   const updateCamera = (camera: THREE.Camera) => {
-    mat3.setFromMatrix4(camera.matrixWorld).invert();
-    cameraRotationMatrix.copy(mat3 as any);
-    cameraPosition.copy(camera.position as any);
-    camera.getWorldDirection(z);
-    cameraDirection.copy(z as any);
+    cameraTransform.quaternion.copy(camera.quaternion as any);
+    cameraTransform.position.copy(camera.position as any);
   };
 
   const api = {
@@ -290,42 +259,4 @@ export const createWorld = () => {
     typeof api = Object.assign(createNanoEvents(), api);
 
   return ee;
-};
-
-const m = new CANNON.Mat3();
-const up = new CANNON.Vec3(0, 1, 0);
-const getUpFace = (q: CANNON.Quaternion) => {
-  up.copy(CANNON.Vec3.UNIT_Y);
-  m.setRotationFromQuaternion(q);
-  m.reverse(m);
-  m.vmult(up, up);
-
-  let value = 0;
-  let d = 0;
-
-  if (up.x > d) {
-    d = up.x;
-    value = 2;
-  }
-  if (-up.x > d) {
-    d = -up.x;
-    value = 5;
-  }
-  if (up.y > d) {
-    d = up.y;
-    value = 1;
-  }
-  if (-up.y > d) {
-    d = -up.y;
-    value = 6;
-  }
-  if (up.z > d) {
-    d = up.z;
-    value = 4;
-  }
-  if (-up.z > d) {
-    d = -up.z;
-    value = 3;
-  }
-  return value;
 };

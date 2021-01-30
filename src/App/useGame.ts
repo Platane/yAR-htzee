@@ -1,6 +1,11 @@
-import { categories, Category, DiceRoll, ScoreSheet } from "../game/types";
+import {
+  categories,
+  Category,
+  DiceRoll,
+  nDice,
+  ScoreSheet,
+} from "../game/types";
 import create from "zustand";
-import { nDice } from "../game/physicalWorld";
 
 const emptyScoreSheet = Object.fromEntries(
   categories.map((category) => [category, null])

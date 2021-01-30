@@ -1,7 +1,8 @@
 import * as React from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "react-three-fiber";
-import { createWorld, nDice } from "../../game/physicalWorld";
+import { createWorld } from "../../game/physicalWorld";
+import { nDice } from "../../game/types";
 
 export const useWorld = (
   dicesRef: React.MutableRefObject<THREE.Object3D | undefined>,
