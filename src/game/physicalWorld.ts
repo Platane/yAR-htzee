@@ -45,40 +45,28 @@ export const createWorld = () => {
     body.addShape(diceShape);
     world.addBody(body);
 
-    const o = new CANNON.Vec3((i % 3) - 1, Math.floor(i / 3), 0);
-
     return Object.assign(body, {
       picked: true,
-      inHand: new CANNON.Transform({
-        position: o.scale(0.5).vadd(new CANNON.Vec3(0, -1.7, -2)),
-        quaternion: new CANNON.Quaternion().setFromEuler(
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2
-        ),
-      }),
-      edge: new CANNON.Transform({
-        position: o
-          .scale(1.6)
-          .addScaledVector(-3 + 2 * Math.random(), CANNON.Vec3.UNIT_Z),
-        quaternion: new CANNON.Quaternion().setFromEuler(
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2
-        ),
-      }),
+      inHand: new CANNON.Transform(),
+      edge: new CANNON.Transform(),
     });
   });
 
-  getPhysicalHand(dices as any).inHand.forEach((t, i) => {
-    dices[i].inHand.position.copy(
-      t.position.vadd(new CANNON.Vec3(0, -1.25, -2.2))
-    );
-    dices[i].inHand.quaternion.copy(t.quaternion);
+  getPhysicalHand(dices as any).forEach(({ inHand, edge }, i) => {
+    const dice = dices[i];
+
+    const o = new CANNON.Vec3(0, -1.6, -3);
+
+    dice.inHand.position.copy(inHand.position.vadd(o));
+    dice.inHand.quaternion.copy(inHand.quaternion);
+
+    dice.edge.position.copy(edge.position.vadd(o));
+    dice.edge.quaternion.copy(edge.quaternion);
   });
 
   // state
   const cameraTransform = new CANNON.Transform();
+  const cameraFlatTransform = new CANNON.Transform();
 
   // x=0  -> dice is on the board
   // x=1  -> dice is in hand
@@ -153,20 +141,11 @@ export const createWorld = () => {
     for (const dice of dices) {
       if (!dice.picked) continue;
 
-      cameraTransform.pointToWorld(dice.inHand.position, inHand);
-      cameraTransform.pointToWorld(dice.edge.position, pushEdge);
-
-      E.copy(inHand);
-      E.lerp(dice.position, 1 - pullSpring.x, E);
-      E.lerp(pushEdge, pushSpring.x, E);
-
-      dice.position.copy(E);
+      getPreRollPose(dice, dice);
 
       const forceDirection = CANNON.Vec3.UNIT_Z.clone();
 
       cameraTransform.quaternion.vmult(forceDirection, forceDirection);
-      forceDirection.y = 0;
-      forceDirection.normalize();
       forceDirection.y = -0.6;
       forceDirection.normalize();
 
@@ -212,10 +191,30 @@ export const createWorld = () => {
     });
   };
 
-  // TODO use transform instead
-  const inHand = new CANNON.Vec3();
-  const pushEdge = new CANNON.Vec3();
-  const E = new CANNON.Vec3();
+  const H = new CANNON.Transform();
+  const E = new CANNON.Transform();
+  const X = new CANNON.Transform();
+  const getPreRollPose = (
+    dice: any,
+    {
+      position,
+      quaternion,
+    }: { position: CANNON.Vec3; quaternion: CANNON.Quaternion }
+  ) => {
+    cameraTransform.pointToWorld(dice.inHand.position, H.position);
+    cameraFlatTransform.pointToWorld(dice.edge.position, E.position);
+
+    position.copy(H.position);
+    position.lerp(dice.position, 1 - pullSpring.x, position);
+    position.lerp(E.position, pushSpring.x, position);
+
+    cameraTransform.quaternion.mult(dice.inHand.quaternion, H.quaternion);
+    cameraTransform.quaternion.mult(dice.edge.quaternion, E.quaternion);
+
+    quaternion.copy(H.quaternion);
+    quaternion.slerp(dice.quaternion, 1 - pullSpring.x, quaternion);
+    quaternion.slerp(E.quaternion, pushSpring.x, quaternion);
+  };
 
   const copy = (i: number, target?: THREE.Object3D) => {
     if (!target) return;
@@ -228,28 +227,22 @@ export const createWorld = () => {
 
       //
     } else if (status === "picking" || status === "pre-roll") {
-      cameraTransform.pointToWorld(dice.inHand.position, inHand);
-      cameraTransform.pointToWorld(dice.edge.position, pushEdge);
+      getPreRollPose(dice, X);
 
-      E.copy(inHand);
-      E.lerp(dice.position, 1 - pullSpring.x, E);
-      E.lerp(pushEdge, pushSpring.x, E);
-
-      target.position.copy(E as any);
-
-      const Eq = new CANNON.Quaternion();
-      Eq.copy(dice.inHand.quaternion);
-      Eq.slerp(dice.quaternion, 1 - pullSpring.x, Eq);
-      Eq.slerp(dice.edge.quaternion, pushSpring.x, Eq);
-
-      target.setRotationFromQuaternion(Eq as any);
-      //
+      target.position.copy(X.position as any);
+      target.setRotationFromQuaternion(X.quaternion as any);
     }
   };
 
   const updateCamera = (camera: THREE.Camera) => {
     cameraTransform.quaternion.copy(camera.quaternion as any);
     cameraTransform.position.copy(camera.position as any);
+
+    cameraFlatTransform.quaternion.copy(camera.quaternion as any);
+    cameraFlatTransform.quaternion.x = 0;
+    cameraFlatTransform.quaternion.z = 0;
+    cameraFlatTransform.quaternion.normalize();
+    cameraFlatTransform.position.copy(camera.position as any);
   };
 
   const api = {

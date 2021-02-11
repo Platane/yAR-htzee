@@ -1,8 +1,4 @@
 import * as CANNON from "cannon-es";
-import { stepSpring } from "./spring";
-import { createNanoEvents, Emitter } from "nanoevents";
-import * as THREE from "three";
-import { MathUtils } from "three";
 import { nDice } from "./types";
 
 const stepDuration = 2 / 60;
@@ -12,45 +8,62 @@ const stepDuration = 2 / 60;
  * aka dices pulled together but not overlapping
  */
 export const getPhysicalHand = (startingPoses: CANNON.Transform[]) => {
-  startingPoses.forEach((pose, i) => {
-    const body = bodies[i];
+  // prepare
+  bodies.forEach((body, i) => {
+    world.removeBody(body);
 
-    body.velocity.setZero();
-    body.angularVelocity.setZero();
-    body.position.copy(pose.position);
-    body.quaternion.copy(pose.quaternion);
+    const pose = startingPoses[i];
 
-    world.addBody(body);
+    if (pose) {
+      body.velocity.setZero();
+      body.angularVelocity.setZero();
+      body.position.copy(pose.position);
+      body.quaternion.copy(pose.quaternion);
+
+      world.addBody(body);
+    }
   });
 
   let stable = false;
   while (!stable) {
-    startingPoses.forEach((_, i) => bodies[i].spring.applyForce());
+    // step
+    for (let k = 10; k--; ) {
+      bodies.forEach(({ spring }) => spring.applyForce());
+      world.step(5 / 60);
+    }
 
-    world.step(stepDuration, stepDuration * 10, 10);
-
-    stable = !startingPoses.some(
-      (_, i) =>
-        bodies[i].velocity.lengthSquared() > 0.1 ||
-        bodies[i].angularVelocity.lengthSquared() > 0.01
+    // check if stable
+    stable = bodies.every(
+      (body) =>
+        body.velocity.lengthSquared() < 0.1 &&
+        body.angularVelocity.lengthSquared() < 0.05
     );
   }
 
-  const inHand = startingPoses.map(
-    (_, i) =>
-      new CANNON.Transform({
-        position: bodies[i].position.clone(),
-        quaternion: bodies[i].quaternion.clone(),
-      })
-  );
-
-  // clean up
-  startingPoses.forEach((_, i) => {
+  return startingPoses.map((_, i) => {
     const body = bodies[i];
-    world.removeBody(body);
-  });
 
-  return { inHand };
+    const inHand = new CANNON.Transform({
+      position: body.position.clone(),
+      quaternion: body.quaternion.clone(),
+    });
+
+    const position = new CANNON.Vec3(
+      body.position.x * 2,
+      body.position.y * 1.8,
+      body.position.z * 1.2 - 2.2
+    );
+
+    const quaternion = new CANNON.Quaternion(
+      (Math.random() - 0.5) * 2,
+      (Math.random() - 0.5) * 2,
+      (Math.random() - 0.5) * 2
+    ).normalize();
+
+    const edge = new CANNON.Transform({ position, quaternion });
+
+    return { inHand, edge };
+  });
 };
 
 const world = new CANNON.World();
