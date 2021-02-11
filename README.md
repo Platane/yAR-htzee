@@ -3,7 +3,19 @@
 ![type definitions](https://img.shields.io/npm/types/typescript?style=flat-square)
 ![code style](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)
 
+[![](./doc/game.gif)](./doc/game.mp4)
+
+A pretty cool yahtzee game in augmented reality.
+
 [yAR-htzee](https://yAR-htzee-platane.surge.sh)
+
+> ⚠️ Unfortunately I no longer have a 8thwall plan. The AR features have been disabled.
+
+# Background
+
+This game uses 8thwall SDK to achieve world tracking.
+
+The dice are renderer with three js using react-three-fiber and the physical world is simulated with cannon.
 
 # Install
 

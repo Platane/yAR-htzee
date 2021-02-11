@@ -14,6 +14,8 @@ import { PickHint } from "./Ui/Hints/PickHint";
 import { PullHint } from "./Ui/Hints/PullHint";
 import { useDelay } from "./Ui/useDelay";
 import { GithubLogo } from "./Ui/GithubLogo";
+// @ts-ignore
+import { Visualizer } from "react-touch-visualizer";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
@@ -67,6 +69,8 @@ export const App = ({ onReady, started }: Props) => {
 
   return (
     <>
+      {false && <Visualizer />}
+
       <VersatileCanvas
         xr8ApiKey={xr8ApiKey}
         onReady={() => setRendererReady(true)}
