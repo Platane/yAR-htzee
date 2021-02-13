@@ -92,8 +92,8 @@ export const createWorld = () => {
   const step = (dt_: number) => {
     const dt = Math.min(dt_, stepDuration * 3);
 
-    stepSpring(pullSpring, springParams, pullSpring.target, dt);
-    stepSpring(pushSpring, springParams, pushSpring.target, dt);
+    stepSpring(pullSpring, springParams, dt);
+    stepSpring(pushSpring, springParams, dt);
 
     if (status === "pre-roll") {
       if (pushSpring.x > 0.8) roll();

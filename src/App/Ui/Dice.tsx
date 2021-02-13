@@ -1,6 +1,37 @@
 import * as React from "react";
 
-const m = 20;
+type Props = {
+  value: 1 | 2 | 3 | 4 | 5 | 6;
+  diceColor?: string;
+  lineColor?: string;
+} & React.HTMLAttributes<SVGElement>;
+
+/**
+ * svg dice faces
+ */
+export const Dice = ({
+  value,
+  diceColor = "#f8f8f8",
+  lineColor = "#333",
+  ...props
+}: Props) => (
+  <svg width={26} height={26} {...props} viewBox="-50 -50 200 200">
+    <rect
+      x="-40"
+      y="-40"
+      width="180"
+      height="180"
+      rx="15"
+      fill={diceColor}
+      stroke={lineColor}
+      strokeWidth={8}
+    />
+
+    {dots[value].map(({ x, y }, i) => (
+      <circle key={i} cx={x} cy={y} r={16} fill={lineColor} />
+    ))}
+  </svg>
+);
 
 const dots = {
   1: [
@@ -38,33 +69,3 @@ const dots = {
     { x: 0, y: 50 },
   ],
 };
-
-type Props = {
-  value: 1 | 2 | 3 | 4 | 5 | 6;
-  diceColor?: string;
-  lineColor?: string;
-} & React.HTMLAttributes<SVGElement>;
-
-export const Dice = ({
-  value,
-  diceColor = "#f8f8f8",
-  lineColor = "#333",
-  ...props
-}: Props) => (
-  <svg width={26} height={26} {...props} viewBox="-50 -50 200 200">
-    <rect
-      x="-40"
-      y="-40"
-      width="180"
-      height="180"
-      rx="15"
-      fill={diceColor}
-      stroke={lineColor}
-      strokeWidth={8}
-    />
-
-    {dots[value].map(({ x, y }, i) => (
-      <circle key={i} cx={x} cy={y} r={16} fill={lineColor} />
-    ))}
-  </svg>
-);

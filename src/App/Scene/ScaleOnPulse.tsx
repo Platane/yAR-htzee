@@ -16,7 +16,7 @@ export const ScaleOnPulse = ({ pulse, children }: Props) => {
   }, [pulse]);
 
   useFrame((_, dt) => {
-    stepSpring(spring.current, springParams, spring.current.target, dt);
+    stepSpring(spring.current, springParams, dt);
 
     if (spring.current.x > 1) spring.current.target = 0;
 

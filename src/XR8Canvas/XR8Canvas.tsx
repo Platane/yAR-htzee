@@ -14,6 +14,17 @@ export type Props = XR8Props &
   CanvasProps &
   React.HTMLAttributes<HTMLDivElement>;
 
+/**
+ * a react-three-fiber canvas,
+ * - draw the camera feed on canvas, then draw the 3d world over
+ * - update the camera with 8thwall world tracking info
+ *
+ *
+ * Implementation:
+ * Use 8thwall render loop.
+ * Disable react-three-fiber internal loop, still allows for subscription to frame update with mock to use 8thwall update instead.
+ * Use the same canvas for 8thwall gl context, and react-three-fiber renderer. Assume the context is the same as long as we pass the same canvas.
+ */
 export const XR8Canvas = ({
   children,
   xr8ApiKey,
@@ -145,7 +156,6 @@ const InsideCanvas = ({
           // cameraConfig: {
           //   direction: XR8.XrConfig.camera().BACK,
           // },
-          // glContextConfig: webglOptions,
         });
       })
       .catch((error) => {

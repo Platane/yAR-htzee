@@ -57,7 +57,7 @@ export const SelectedDiceHint = ({ selected }: any) => {
   spring.current.target = selected ? 1 : 0;
 
   useFrame(({ camera }, dt) => {
-    stepSpring(spring.current, springParams, spring.current.target, dt);
+    stepSpring(spring.current, springParams, dt);
 
     const [tube, panel] = ref.current?.children ?? [];
 
