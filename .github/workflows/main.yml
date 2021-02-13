@@ -18,6 +18,7 @@ jobs:
       - run: yarn lint
       - run: yarn test
       - run: yarn build
+      - run: cp doc/* ./build/
       - run: yarn surge ./build yAR-htzee-platane.surge.sh
         env:
           SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
