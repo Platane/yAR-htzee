@@ -1,19 +1,8 @@
 import * as React from "react";
 import { Dice } from "./Dice";
-import { Hand } from "./Hints/Hand";
 
-type Props = { onClose: () => void; loading: boolean };
-
-export const PageRules = ({ onClose, loading }: Props) => (
-  <div
-    style={{
-      padding: "10px",
-      display: "flex",
-      flexDirection: "column",
-      position: "relative",
-      zIndex: 2,
-    }}
-  >
+export const PageRules = () => (
+  <>
     <h1 style={{ alignSelf: "center" }}>yAR-htzee</h1>
 
     <div
@@ -58,19 +47,5 @@ export const PageRules = ({ onClose, loading }: Props) => (
     </p>
 
     <p>Sum all combinations points and replay to beat your score!</p>
-
-    <button
-      style={{
-        width: "160px",
-        height: "40px",
-        marginTop: "60px",
-        alignSelf: "center",
-      }}
-      onClick={loading ? undefined : onClose}
-      disabled={loading}
-    >
-      {loading && "loading..."}
-      {!loading && "Start"}
-    </button>
-  </div>
+  </>
 );

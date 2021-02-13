@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Environment, useDetectGPU, useProgress } from "drei";
+import { Environment, useProgress } from "drei";
 import { Board } from "./Scene/Board";
 import * as THREE from "three";
 import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
@@ -19,7 +19,11 @@ import { Visualizer } from "react-touch-visualizer";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
 
-type Props = { onReady: () => void; started: boolean };
+type Props = {
+  started: boolean;
+  onReady: () => void;
+  onProgress?: (x: number) => void;
+};
 
 const useHint = ({ status, k, dicesToReroll, roundKey }: any) => {
   if (roundKey > 1 || k > 1) return null;
@@ -32,7 +36,7 @@ const useHint = ({ status, k, dicesToReroll, roundKey }: any) => {
   }
 };
 
-export const App = ({ onReady, started }: Props) => {
+export const App = ({ onReady, onProgress, started }: Props) => {
   const [error, setError] = React.useState<Error>();
   if (error) throw error;
 
@@ -59,11 +63,23 @@ export const App = ({ onReady, started }: Props) => {
     2000
   );
 
-  const { tier } = useDetectGPU() ?? {};
   const [rendererReady, setRendererReady] = React.useState(false);
+
   {
-    const { active } = useProgress();
+    const { active, progress, total } = useProgress();
     const r = rendererReady && !active;
+
+    const globalProgress =
+      // loading the asses account for 70%
+      (total > 1 ? progress / 100 : 0) * 0.7 +
+      //
+      // loading the renderer account for 20%
+      (rendererReady ? 1 : 0) * 0.2 +
+      //
+      // loading this component account for 10%
+      0.1;
+
+    React.useEffect(() => void onProgress?.(globalProgress), [globalProgress]);
     React.useEffect(() => void (r && onReady()), [r]);
   }
 

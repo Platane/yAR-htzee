@@ -1,38 +1,35 @@
 import * as React from "react";
-import { PageRules } from "./Ui/PageRules";
+import { LoadingScreen } from "./Ui/LoadingScreen";
 
 // import LazyApp from "./App";
 const LazyApp = React.lazy(() => import("./App"));
 
 export const Boot = () => {
-  const [ready, setReady] = React.useState(false);
+  const [loadingStatus, setLoadingStatus] = React.useState<
+    "ready" | { progress: number }
+  >({ progress: 0 });
   const [started, setStarted] = React.useState(false);
 
   return (
     <ErrorBoundary>
       <React.Suspense fallback={null}>
-        <LazyApp onReady={() => setReady(true)} started={started} />
+        <LazyApp
+          started={started}
+          onReady={() => setLoadingStatus("ready")}
+          onProgress={(progress) =>
+            setLoadingStatus((s) => (s === "ready" ? s : { progress }))
+          }
+        />
       </React.Suspense>
 
       {!started && (
-        <PageRules loading={!ready} onClose={() => setStarted(true)} />
-      )}
-
-      {!ready && false && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          loading...
-        </div>
+        <LoadingScreen
+          loading={loadingStatus !== "ready"}
+          loadingProgress={
+            loadingStatus !== "ready" ? loadingStatus.progress : 1
+          }
+          onClose={() => setStarted(true)}
+        />
       )}
     </ErrorBoundary>
   );
