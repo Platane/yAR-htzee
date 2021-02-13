@@ -4,10 +4,10 @@
 ![code style](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)
 
 <div>
-<a href="https://yar-htzee-platane.surge.sh/game.mp4"><img  height="320" src="./doc/game.gif"></a>
-<img  height="320" src="./doc/ar-throw.jpg">
-<img  height="320" src="./doc/ar-scoresheet.jpg">
-<img  height="320" src="./doc/desktop-pick.jpg">
+<a href="https://yar-htzee-platane.surge.sh/game.mp4"><img width="188" height="320" src="./doc/game.gif"></a>
+<img width="188" height="320" src="./doc/ar-throw.jpg">
+<img width="188" height="320" src="./doc/ar-scoresheet.jpg">
+<img width="188" height="320" src="./doc/desktop-pick.jpg">
 </div>
 
 A pretty cool yahtzee game in augmented reality.
