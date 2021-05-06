@@ -7,20 +7,14 @@ import type { XR8 } from "./XR8";
  */
 export const getXR8 = (): XR8 | null => (window as any).XR8 || null;
 
+export const xr8Hosted = window.location.host.endsWith("8thwall.app");
+
 /**
  *
  * load 8th wall sdk once
  * resolve with XR8 when it's ready
  */
-export const loadXR8 = (apiKey: string) => {
-  if (!globalLoadPromise) globalLoadPromise = internalLoadXR8(apiKey);
-  return globalLoadPromise;
-};
-let globalLoadPromise: Promise<XR8>;
-
-export const xr8Hosted = window.location.host.endsWith("8thwall.app");
-
-const internalLoadXR8 = async (apiKey: string) => {
+export const loadXR8 = async (apiKey: string) => {
   // in 8thwall demo page, the script is loaded automatically
   if (!xr8Hosted) {
     const src = `//apps.8thwall.com/xrweb?appKey=${apiKey}`;

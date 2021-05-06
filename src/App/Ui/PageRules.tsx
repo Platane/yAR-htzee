@@ -33,8 +33,7 @@ export const PageRules = () => (
     <p>This game is about making combination with 5 dices.</p>
 
     <p>
-      You get to roll the dices, and re-roll any number of dice you want two
-      times.
+      You get to roll the dices, and two phases to re-roll any number of dices.
     </p>
 
     <p>

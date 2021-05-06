@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useFrame } from "react-three-fiber";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { stepSpring } from "../../game/spring";
 import { path as refreshIconPath } from "../Ui/RefreshIcon";

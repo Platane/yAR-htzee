@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as THREE from "three";
-import { useFrame } from "react-three-fiber";
+import { useFrame } from "@react-three/fiber";
 import { MathUtils } from "three";
 
 export const Target = () => {

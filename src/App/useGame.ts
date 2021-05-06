@@ -67,7 +67,7 @@ export const useStore = create<State & Api>((set) => ({
         state.k >= 3 ||
         isFinished(state.scoreSheet)
       )
-        return {};
+        return state;
 
       return {
         dicesToReroll: state.dicesToReroll.includes(i)
@@ -77,21 +77,22 @@ export const useStore = create<State & Api>((set) => ({
     }),
 
   onRollStatusChanged: (status, roll) =>
-    set(({ k }) => {
-      if (status === "rolling") return { status, k: k + 1 };
+    set((state) => {
+      if (status === "rolling") return { ...state, status, k: state.k + 1 };
 
-      if (status === "picking") return { status, roll, dicesToReroll: [] };
+      if (status === "picking")
+        return { ...state, status, roll: roll ?? null, dicesToReroll: [] };
 
-      return { status };
+      return { ...state, status };
     }),
 
   selectCategoryForRoll: (category) =>
     set((state) => {
-      if (state.status !== "picking") return {};
+      if (state.status !== "picking") return state;
 
-      if (!state.roll) return {};
+      if (!state.roll) return state;
 
-      if (state.scoreSheet[category]) return {};
+      if (state.scoreSheet[category]) return state;
 
       const scoreSheet = {
         ...state.scoreSheet,
@@ -100,6 +101,7 @@ export const useStore = create<State & Api>((set) => ({
 
       if (isFinished(scoreSheet))
         return {
+          ...state,
           scoreSheet,
           status: "picking",
           scoreSheetOpened: true,

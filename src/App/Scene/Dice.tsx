@@ -1,4 +1,4 @@
-import { useGLTF } from "drei";
+import { useGLTF } from "@react-three/drei";
 import * as React from "react";
 import * as THREE from "three";
 

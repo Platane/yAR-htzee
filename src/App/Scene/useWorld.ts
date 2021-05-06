@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as THREE from "three";
-import { useFrame, useThree } from "react-three-fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { createWorld } from "../../game/physicalWorld";
 import { nDice } from "../../game/types";
 

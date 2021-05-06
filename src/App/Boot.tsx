@@ -1,8 +1,8 @@
 import * as React from "react";
 import { LoadingScreen } from "./Ui/LoadingScreen";
+import loadable from "@loadable/component";
 
-// import LazyApp from "./App";
-const LazyApp = React.lazy(() => import("./App"));
+const LazyApp = loadable(() => import("./App"));
 
 export const Boot = () => {
   const [loadingStatus, setLoadingStatus] = React.useState<

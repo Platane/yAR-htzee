@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { useFrame } from "react-three-fiber";
+import { useFrame } from "@react-three/fiber";
 
 /**
  * at each frame, resize the directional light shadow camera to it contains exactly the scene bounding box

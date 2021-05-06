@@ -1,8 +1,7 @@
 import * as React from "react";
-import { Environment, useProgress } from "drei";
+import { Environment, useProgress } from "@react-three/drei";
 import { Board } from "./Scene/Board";
 import * as THREE from "three";
-import { VersatileCanvas } from "../XR8Canvas/VersatileCanvas";
 import { Target } from "./Scene/Target";
 import { ScoreSheet } from "./Ui/ScoreSheet/ScoreSheet";
 import { useStore } from "./useGame";
@@ -14,10 +13,15 @@ import { PickHint } from "./Ui/Hints/PickHint";
 import { PullHint } from "./Ui/Hints/PullHint";
 import { useDelay } from "./Ui/useDelay";
 import { GithubLogo } from "./Ui/GithubLogo";
+import { Canvas } from "@react-three/fiber";
+import { XR8Controls } from "../XR8Canvas/XR8Controls";
+import { useXR8 } from "../XR8Canvas/useXR8";
 // @ts-ignore
 import { Visualizer } from "react-touch-visualizer";
+import { xr8Hosted } from "../XR8Canvas/getXR8";
 
 const xr8ApiKey = process.env.XR8_API_KEY!;
+const touchSupported = "ontouchend" in document;
 
 type Props = {
   started: boolean;
@@ -63,36 +67,37 @@ export const App = ({ onReady, onProgress, started }: Props) => {
     2000
   );
 
-  const [rendererReady, setRendererReady] = React.useState(false);
+  const [xr8Ready, setXr8Ready] = React.useState(false);
+
+  const xr8Supported = (xr8ApiKey || xr8Hosted) && touchSupported;
+
+  const xr8 = xr8Supported ? useXR8(xr8ApiKey) : null;
 
   {
     const { active, progress, total } = useProgress();
-    const r = rendererReady && !active;
+    const ready = (!xr8Supported || xr8Ready) && !active;
 
     const globalProgress =
       // loading the asses account for 70%
       (total > 1 ? progress / 100 : 0) * 0.7 +
       //
       // loading the renderer account for 20%
-      (rendererReady ? 1 : 0) * 0.2 +
+      (!xr8Supported || xr8Ready ? 1 : 0) * 0.2 +
       //
       // loading this component account for 10%
       0.1;
 
     React.useEffect(() => void onProgress?.(globalProgress), [globalProgress]);
-    React.useEffect(() => void (r && onReady()), [r]);
+    React.useEffect(() => void (ready && onReady()), [ready]);
   }
 
   return (
     <>
       {false && <Visualizer />}
 
-      <VersatileCanvas
-        xr8ApiKey={xr8ApiKey}
-        onReady={() => setRendererReady(true)}
-        onError={setError as any}
+      <Canvas
         camera={{ position: new THREE.Vector3(0, 6, 6) }}
-        shadowMap
+        shadows
         style={{
           position: "fixed",
           top: 0,
@@ -104,6 +109,8 @@ export const App = ({ onReady, onProgress, started }: Props) => {
         }}
       >
         <ErrorBoundary onError={setError}>
+          {xr8 && <XR8Controls xr8={xr8} onReady={() => setXr8Ready(true)} />}
+
           <React.Suspense fallback={null}>
             <Environment path={"assets/"} files={"lebombo_1k.hdr"} />
 
@@ -122,7 +129,7 @@ export const App = ({ onReady, onProgress, started }: Props) => {
 
           <Ground />
         </ErrorBoundary>
-      </VersatileCanvas>
+      </Canvas>
 
       {started && (
         <>
