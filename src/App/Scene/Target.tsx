@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { MathUtils } from "three";
 
 export const Target = () => {
-  const ref = React.useRef<THREE.Object3D>();
+  const ref = React.useRef<THREE.Mesh | null>(null);
 
   useFrame(({ camera }) => {
     // camera position + dice end roll estimation
@@ -23,7 +23,7 @@ export const Target = () => {
 
   return (
     <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
-      <circleBufferGeometry args={[2, 32]} />
+      <circleGeometry args={[2, 32]} />
       <meshPhysicalMaterial
         color={"orange"}
         opacity={0.4}

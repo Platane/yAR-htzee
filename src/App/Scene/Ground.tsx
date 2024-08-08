@@ -10,7 +10,7 @@ export const Ground = () => {
       position={[0, -0.001, 0]}
       receiveShadow
     >
-      <planeBufferGeometry args={[100, 100]} />
+      <planeGeometry args={[100, 100]} />
       <shadowMaterial opacity={0.4} />
     </mesh>
   );
