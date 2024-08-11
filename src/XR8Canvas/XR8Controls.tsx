@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useThree, useFrame } from "@react-three/fiber";
+import type * as THREE from "three";
 import type { XR8, XR8Pipeline } from "./XR8";
 
 export const XR8Controls = ({
@@ -86,7 +87,8 @@ const createCustomPipeline = (
     name: "custom-three-fiber",
     onException: onError,
     onStart: ({ GLctx, canvasWidth, canvasHeight }) => {
-      if (GLctx !== renderer.context) throw new Error("context do not match");
+      if (GLctx !== renderer.getContext())
+        throw new Error("context do not match");
 
       renderer.setSize(canvasWidth, canvasHeight);
 

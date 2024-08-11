@@ -9,7 +9,7 @@ type Props = {
 };
 
 export const ScaleOnPulse = ({ pulse, children }: Props) => {
-  const ref = React.useRef<THREE.Object3D>();
+  const ref = React.useRef<THREE.Group | null>(null);
   const spring = React.useRef({ x: 0, v: 0, target: 0 });
   React.useEffect(() => {
     if (pulse) spring.current.target = 1;

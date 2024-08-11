@@ -24,8 +24,8 @@ export const Board = ({
   toggleDiceReroll,
   dicesToReroll,
 }: Props) => {
-  const dicesRef = React.useRef<THREE.Object3D>();
-  const hintsRef = React.useRef<THREE.Object3D>();
+  const dicesRef = React.useRef<THREE.Group | null>(null);
+  const hintsRef = React.useRef<THREE.Group | null>(null);
 
   const [dragging, setDragging] = React.useState(false);
 

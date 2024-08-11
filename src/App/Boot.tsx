@@ -35,7 +35,7 @@ export const Boot = () => {
   );
 };
 
-class ErrorBoundary extends React.Component {
+class ErrorBoundary extends React.Component<{ children: any }> {
   state: { error?: Error } = {};
 
   static getDerivedStateFromError(error: Error) {

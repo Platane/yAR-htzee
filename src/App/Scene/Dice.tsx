@@ -17,19 +17,18 @@ type Props = {
  * 1x1x1 dice
  */
 export const Dice = ({ selected, ...props }: Props) => {
-  const { nodes, materials } = useGLTF(diceUrl);
+  const { nodes } = useGLTF(diceUrl);
 
-  const mat = materials.Dice as THREE.MeshStandardMaterial;
+  const mesh = nodes.mesh_0 as THREE.Mesh;
 
   return (
     <mesh
       {...props}
       castShadow
-      geometry={(nodes.mesh_0 as any).geometry}
+      geometry={mesh.geometry}
+      material={mesh.material}
       scale={scale}
       dispose={null}
-    >
-      <meshStandardMaterial {...mat} color={selected ? "hotpink" : mat.color} />
-    </mesh>
+    />
   );
 };

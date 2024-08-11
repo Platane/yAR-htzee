@@ -5,8 +5,8 @@ import { createWorld } from "../../game/physicalWorld";
 import { nDice } from "../../game/types";
 
 export const useWorld = (
-  dicesRef: React.MutableRefObject<THREE.Object3D | undefined>,
-  hintsRef: React.MutableRefObject<THREE.Object3D | undefined>,
+  dicesRef: React.MutableRefObject<THREE.Group | null>,
+  hintsRef: React.MutableRefObject<THREE.Group | null>,
   onDragChanged?: (dragged: boolean) => void
 ) => {
   // instantiate the world

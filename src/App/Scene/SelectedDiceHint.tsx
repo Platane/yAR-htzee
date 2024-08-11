@@ -47,7 +47,7 @@ createTexture().then((t) => {
     THREE.ClampToEdgeWrapping,
     THREE.LinearFilter,
     THREE.LinearFilter,
-    THREE.RGBEFormat
+    THREE.RGBAFormat
   );
   texture.generateMipmaps = true;
 });
@@ -75,23 +75,23 @@ export const SelectedDiceHint = ({ selected }: any) => {
     panel.lookAt(camera.position);
   });
 
-  const ref = React.useRef<THREE.Object3D>();
+  const ref = React.useRef<THREE.Group | null>(null);
 
   return (
     <group ref={ref}>
       <mesh rotation={[0, 0, 0]} position={[0, 0.5, 0]}>
-        <cylinderBufferGeometry args={[0.04, 0.04, 1.6, 5]} />
+        <cylinderGeometry args={[0.04, 0.04, 1.6, 5]} />
         <meshBasicMaterial color={"orange"} />
       </mesh>
 
       <group position={[0, 1.4, 0]}>
         <mesh>
-          <planeBufferGeometry args={[0.6, 0.6, 1, 1]} />
+          <planeGeometry args={[0.6, 0.6, 1, 1]} />
           <meshBasicMaterial map={texture} transparent />
         </mesh>
 
         <mesh position={[0, 0, -0.01]}>
-          <circleBufferGeometry args={[0.4, 32]} />
+          <circleGeometry args={[0.4, 32]} />
           <meshBasicMaterial color="orange" />
         </mesh>
       </group>

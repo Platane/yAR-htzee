@@ -13,14 +13,14 @@ import { PickHint } from "./Ui/Hints/PickHint";
 import { PullHint } from "./Ui/Hints/PullHint";
 import { useDelay } from "./Ui/useDelay";
 import { GithubLogo } from "./Ui/GithubLogo";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { XR8Controls } from "../XR8Canvas/XR8Controls";
 import { useXR8 } from "../XR8Canvas/useXR8";
 // @ts-ignore
 import { Visualizer } from "react-touch-visualizer";
 import { xr8Hosted } from "../XR8Canvas/getXR8";
 
-const xr8ApiKey = process.env.XR8_API_KEY!;
+const xr8ApiKey: string = ""; //process.env.XR8_API_KEY!;
 const touchSupported = "ontouchend" in document;
 
 type Props = {
@@ -195,10 +195,9 @@ export const App = ({ onReady, onProgress, started }: Props) => {
   );
 };
 
-// <Board placed={placed} />
-
 class ErrorBoundary extends React.Component<{
   onError: (error: Error) => void;
+  children: any;
 }> {
   static getDerivedStateFromError = (error: Error) => ({ error });
 
