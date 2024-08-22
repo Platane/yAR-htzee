@@ -16,6 +16,7 @@ export const Overlay = ({ children }: any) => (
       height: "100%",
       backgroundColor: "rgba(0,0,0,0.1)",
       overflow: "auto",
+      pointerEvents: "auto",
     }}
   >
     {children}

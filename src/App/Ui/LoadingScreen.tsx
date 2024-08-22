@@ -1,9 +1,19 @@
 import * as React from "react";
 import { PageRules } from "./PageRules";
 
-type Props = { onClose: () => void; loading: boolean; loadingProgress: number };
+type Props = {
+  onStart: (ar: boolean) => void;
+  loading: boolean;
+  loadingProgress: number;
+  arSupported: boolean | "loading";
+};
 
-export const LoadingScreen = ({ onClose, loading, loadingProgress }: Props) => (
+export const LoadingScreen = ({
+  onStart,
+  loading,
+  loadingProgress,
+  arSupported,
+}: Props) => (
   <div
     style={{
       padding: "10px",
@@ -15,19 +25,38 @@ export const LoadingScreen = ({ onClose, loading, loadingProgress }: Props) => (
   >
     <PageRules />
 
-    <button
-      style={{
-        width: "160px",
-        height: "40px",
-        marginTop: "60px",
-        alignSelf: "center",
-      }}
-      onClick={loading ? undefined : onClose}
-      disabled={loading}
-    >
-      {loading &&
-        `loading ${(loadingProgress * 100).toFixed(0).padStart(3, " ")}% ...`}
-      {!loading && "Start"}
-    </button>
+    {loading && (
+      <Button disabled>{`loading ${(loadingProgress * 100)
+        .toFixed(0)
+        .padStart(3, " ")}% ...`}</Button>
+    )}
+
+    {!loading && !arSupported && (
+      <Button onClick={() => onStart(false)}>Start</Button>
+    )}
+
+    {!loading && arSupported && (
+      <>
+        <Button onClick={() => onStart(true)}>Start AR</Button>
+        <Button onClick={() => onStart(false)} style={{ opacity: 0.7 }}>
+          Start flat
+        </Button>
+      </>
+    )}
   </div>
+);
+
+const Button = ({ children, style, ...props }: any) => (
+  <button
+    {...props}
+    style={{
+      width: "160px",
+      height: "40px",
+      marginTop: "60px",
+      alignSelf: "center",
+      ...style,
+    }}
+  >
+    {children}
+  </button>
 );

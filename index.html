@@ -1,19 +1,35 @@
 <!DOCTYPE html>
+
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>🎲</title>
-    <style></style>
+
+    <style>
+      body {
+        margin: 0;
+        user-select: none;
+        font-family: system-ui, helvetica, Arial;
+      }
+
+      #overlay {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+    </style>
   </head>
-  <body
-    style="
-      margin: 0;
-      user-select: none;
-      font-family: system-ui, helvetica, Arial;
-    "
-  >
+
+  <body>
     <div id="root"></div>
+    <div id="overlay"></div>
+
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>
