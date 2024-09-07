@@ -46,8 +46,8 @@ export const Boot = () => {
           loadingProgress={
             loadingStatus !== "ready" ? loadingStatus.progress : 1
           }
-          onStart={(ar: boolean) => {
-            if (ar) webXR.init();
+          onStart={async (ar: boolean) => {
+            if (ar) await webXR.init();
             setStarted(true);
           }}
         />

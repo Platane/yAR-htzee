@@ -64,25 +64,70 @@ export const WebXRControls = ({
     events,
   } = useThree();
 
+  const viewRef = React.useRef<XRView>();
+
+  useFrame(() => {
+    const view = viewRef.current;
+
+    if (view) {
+      const glLayer = webXRSession.renderState.baseLayer!;
+
+      const gl = renderer.getContext();
+
+      const viewport = glLayer.getViewport(view)!;
+
+      renderer.setViewport(
+        viewport.x,
+        viewport.y,
+        viewport.width,
+        viewport.height
+      );
+
+      // TODO create this outside the loop
+      const newRenderTarget = new THREE.WebGLRenderTarget(
+        glLayer.framebufferWidth,
+        glLayer.framebufferHeight,
+        {
+          format: THREE.RGBAFormat,
+          type: THREE.UnsignedByteType,
+          colorSpace: renderer.outputColorSpace,
+          stencilBuffer: gl.getContextAttributes()?.stencil,
+        }
+      );
+
+      // console.log("render");
+
+      renderer.setRenderTargetFramebuffer(newRenderTarget, glLayer.framebuffer);
+      renderer.setRenderTarget(newRenderTarget);
+
+      renderer.render(scene, camera);
+    }
+  }, 1);
+
   React.useLayoutEffect(() => {
     const gl = renderer.getContext();
 
-    gl.makeXRCompatible().then(() => {
-      webXRSession.updateRenderState({
-        baseLayer: new XRWebGLLayer(webXRSession, gl),
-      });
-    });
+    gl.makeXRCompatible()
+      .then(() => {
+        webXRSession.updateRenderState({
+          baseLayer: new XRWebGLLayer(webXRSession, gl),
+        });
+      })
+      .catch(setError);
 
     let localReference: XRReferenceSpace;
 
-    webXRSession.requestReferenceSpace("local-floor").then((r) => {
-      localReference = r;
+    webXRSession
+      .requestReferenceSpace("local-floor")
+      .then((r) => {
+        localReference = r;
 
-      localReference.addEventListener("reset", ({ transform }) => {
-        if (transform)
-          localReference = localReference.getOffsetReferenceSpace(transform);
-      });
-    });
+        localReference.addEventListener("reset", ({ transform }) => {
+          if (transform)
+            localReference = localReference.getOffsetReferenceSpace(transform);
+        });
+      })
+      .catch(setError);
 
     let cancel: number;
     let lastTime: number;
@@ -96,11 +141,11 @@ export const WebXRControls = ({
       const dt = t - (lastTime ?? t);
       lastTime = t;
 
-      const glLayer = webXRSession.renderState.baseLayer!;
       const pose = localReference && frame.getViewerPose(localReference);
 
       if (pose) {
         const view = pose.views[0];
+        viewRef.current = view;
 
         const l = 4;
         camera.position.set(
@@ -132,6 +177,7 @@ export const WebXRControls = ({
               .copy(camera.position)
               .addScaledVector(v, t);
 
+            console.log("found");
             onPoseFound?.();
           }
         }
@@ -143,17 +189,8 @@ export const WebXRControls = ({
         // camera.projectionMatrix.copy(projectionMatrix);
         // camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
 
-        const viewport = glLayer.getViewport(view)!;
-        renderer.setViewport(
-          viewport.x,
-          viewport.y,
-          viewport.width,
-          viewport.height
-        );
+        advance(dt);
       }
-
-      gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
-      advance(dt);
 
       cancel = webXRSession.requestAnimationFrame(onXRFrame);
     };

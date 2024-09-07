@@ -114,7 +114,12 @@ export const App = ({ onReady, onProgress, webXRSession, started }: Props) => {
         <ErrorBoundary onError={setError}>
           {xr8 && <XR8Controls xr8={xr8} onReady={() => setXr8Ready(true)} />}
 
-          {webXRSession && <WebXRControls webXRSession={webXRSession} />}
+          {webXRSession && (
+            <WebXRControls
+              webXRSession={webXRSession}
+              onPoseFound={() => console.log("pose found")}
+            />
+          )}
 
           <React.Suspense fallback={null}>
             <Environment path={"assets/"} files={"lebombo_1k.hdr"} />
