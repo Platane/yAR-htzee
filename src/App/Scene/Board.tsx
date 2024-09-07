@@ -63,6 +63,8 @@ export const Board = ({
               onClick={
                 toggleDiceReroll &&
                 ((event: Event) => {
+                  console.log("click on dice");
+
                   event.stopPropagation();
                   toggleDiceReroll(i);
                 })

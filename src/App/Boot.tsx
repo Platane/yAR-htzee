@@ -1,6 +1,10 @@
 import * as React from "react";
 import { LoadingScreen } from "./Ui/LoadingScreen";
 import loadable from "@loadable/component";
+import {
+  useIsWebXRSupported,
+  useWebXRSession,
+} from "../WebXRCanvas/WebXRControls";
 
 const LazyApp = loadable(() => import("./App"));
 
@@ -10,11 +14,24 @@ export const Boot = () => {
   >({ progress: 0 });
   const [started, setStarted] = React.useState(false);
 
+  const arSupported = useIsWebXRSupported();
+
+  const webXR = useWebXRSession({
+    optionalFeatures: [
+      "dom-overlay",
+      "local-floor",
+      // "light-estimation",
+      // "hit-test",
+    ],
+    domOverlay: { root: document.getElementById("overlay")! },
+  });
+
   return (
     <ErrorBoundary>
       <React.Suspense fallback={null}>
         <LazyApp
           started={started}
+          webXRSession={webXR.session}
           onReady={() => setLoadingStatus("ready")}
           onProgress={(progress) =>
             setLoadingStatus((s) => (s === "ready" ? s : { progress }))
@@ -24,11 +41,15 @@ export const Boot = () => {
 
       {!started && (
         <LoadingScreen
-          loading={loadingStatus !== "ready"}
+          arSupported={arSupported}
+          loading={loadingStatus !== "ready" || arSupported === "loading"}
           loadingProgress={
             loadingStatus !== "ready" ? loadingStatus.progress : 1
           }
-          onClose={() => setStarted(true)}
+          onStart={async (ar: boolean) => {
+            if (ar) await webXR.init();
+            setStarted(true);
+          }}
         />
       )}
     </ErrorBoundary>

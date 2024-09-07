@@ -19,11 +19,14 @@ import { useXR8 } from "../XR8Canvas/useXR8";
 // @ts-ignore
 import { Visualizer } from "react-touch-visualizer";
 import { xr8Hosted } from "../XR8Canvas/getXR8";
+import { WebXRControls } from "../WebXRCanvas/WebXRControls";
+import { createPortal } from "react-dom";
 
 const xr8ApiKey: string = ""; //process.env.XR8_API_KEY!;
 const touchSupported = "ontouchend" in document;
 
 type Props = {
+  webXRSession?: XRSession;
   started: boolean;
   onReady: () => void;
   onProgress?: (x: number) => void;
@@ -40,7 +43,7 @@ const useHint = ({ status, k, dicesToReroll, roundKey }: any) => {
   }
 };
 
-export const App = ({ onReady, onProgress, started }: Props) => {
+export const App = ({ onReady, onProgress, webXRSession, started }: Props) => {
   const [error, setError] = React.useState<Error>();
   if (error) throw error;
 
@@ -111,6 +114,13 @@ export const App = ({ onReady, onProgress, started }: Props) => {
         <ErrorBoundary onError={setError}>
           {xr8 && <XR8Controls xr8={xr8} onReady={() => setXr8Ready(true)} />}
 
+          {webXRSession && (
+            <WebXRControls
+              webXRSession={webXRSession}
+              onPoseFound={() => console.log("pose found")}
+            />
+          )}
+
           <React.Suspense fallback={null}>
             <Environment path={"assets/"} files={"lebombo_1k.hdr"} />
 
@@ -131,66 +141,70 @@ export const App = ({ onReady, onProgress, started }: Props) => {
         </ErrorBoundary>
       </Canvas>
 
-      {started && (
-        <>
-          <Header
-            k={k}
-            status={status}
-            roll={roll}
-            toggleDiceReroll={toggleDiceReroll}
-          />
+      {started &&
+        createPortal(
+          <>
+            <Header
+              k={k}
+              status={status}
+              roll={roll}
+              toggleDiceReroll={toggleDiceReroll}
+            />
 
-          {!scoreSheetOpened && (
-            <button
-              style={{
-                position: "absolute",
-                width: "160px",
-                height: "40px",
-                bottom: "10px",
-                right: "60px",
-                zIndex: 1,
-              }}
-              onClick={openScoreSheet}
-            >
-              score sheet
-            </button>
-          )}
+            {!scoreSheetOpened && (
+              <button
+                style={{
+                  position: "absolute",
+                  width: "160px",
+                  height: "40px",
+                  bottom: "10px",
+                  right: "60px",
+                  zIndex: 1,
+                  pointerEvents: "auto",
+                }}
+                onClick={openScoreSheet}
+              >
+                score sheet
+              </button>
+            )}
 
-          <a href="https://github.com/platane/yAR-htzee" title="github">
-            <button
-              style={{
-                position: "absolute",
-                width: "40px",
-                height: "40px",
-                bottom: "10px",
-                right: "10px",
-                zIndex: 1,
-              }}
-            >
-              <GithubLogo />
-            </button>
-          </a>
+            <a href="https://github.com/platane/yAR-htzee" title="github">
+              <button
+                style={{
+                  position: "absolute",
+                  width: "40px",
+                  height: "40px",
+                  bottom: "10px",
+                  right: "10px",
+                  zIndex: 1,
+                  pointerEvents: "auto",
+                }}
+              >
+                <GithubLogo />
+              </button>
+            </a>
 
-          {scoreSheetOpened && (
-            <Overlay>
-              <ScoreSheet
-                style={{ width: "calc( 100% - 40px )", maxWidth: "600px" }}
-                scoreSheet={scoreSheet}
-                onClose={closeScoreSheet}
-                onSelectCategory={
-                  status === "picking" ? selectCategoryForRoll : undefined
-                }
-                rollCandidate={roll}
-                reset={reset}
-              />
-            </Overlay>
-          )}
+            {scoreSheetOpened && (
+              <Overlay>
+                <ScoreSheet
+                  style={{ width: "calc( 100% - 40px )", maxWidth: "600px" }}
+                  scoreSheet={scoreSheet}
+                  onClose={closeScoreSheet}
+                  onSelectCategory={
+                    status === "picking" ? selectCategoryForRoll : undefined
+                  }
+                  rollCandidate={roll}
+                  reset={reset}
+                />
+              </Overlay>
+            )}
 
-          {hint === "throw" && <ThrowHint />}
-          {hint === "pick" && <PickHint />}
-          {hint === "pull" && <PullHint />}
-        </>
-      )}
+            {hint === "throw" && <ThrowHint />}
+            {hint === "pick" && <PickHint />}
+            {hint === "pull" && <PullHint />}
+          </>,
+          document.getElementById("overlay")!
+        )}
     </>
   );
 };

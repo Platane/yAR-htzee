@@ -17,7 +17,7 @@ jobs:
       - run: bun jest
       - run: bunx vite build
       - run: cp doc/* ./dist/
-      - run: bunx surge ./dist yAR-htzee-platane.surge.sh
-        env:
-          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+      # - run: bunx surge ./dist yAR-htzee-platane.surge.sh
+      #   env:
+      #     SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      #     SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
