@@ -1,10 +1,18 @@
 import * as React from "react";
-import { State, Api } from "../useGame";
 import { Dice } from "./Dice";
+import type { DiceValue } from "../../gameRules/types";
 
-type Props = Pick<State & Api, "k" | "status" | "roll" | "toggleDiceReroll">;
+type Props = {
+  remainingRerolls: number;
+  diceRoll: (DiceValue | "rolling" | "blank")[];
+  onToggleDicePicked?: (diceIndex: number) => void;
+};
 
-export const Header = ({ k, status, roll, toggleDiceReroll }: Props) => (
+export const Header = ({
+  diceRoll,
+  remainingRerolls,
+  onToggleDicePicked,
+}: Props) => (
   <div
     style={{
       position: "absolute",
@@ -20,27 +28,38 @@ export const Header = ({ k, status, roll, toggleDiceReroll }: Props) => (
       pointerEvents: "none",
     }}
   >
-    {roll?.map((x: any, i: number) => (
+    <style>{`
+          @keyframes dice_value_pulse {
+            100%,0% { transform: scale(1,1) }
+            20% { transform: scale(1.15,1.15) }
+          }
+        `}</style>
+
+    {diceRoll.map((x, i) => (
       <Dice
         key={i}
         value={x}
-        style={{ pointerEvents: status === "picking" ? "auto" : "none" }}
-        onClick={() => toggleDiceReroll(i)}
+        style={{
+          pointerEvents: onToggleDicePicked ? "auto" : "none",
+          animation:
+            typeof x === "number" ? "dice_value_pulse 500ms" : undefined,
+        }}
+        onClick={onToggleDicePicked && (() => onToggleDicePicked(i))}
       />
     ))}
 
-    {roll && (
-      <span
-        style={{
-          marginLeft: "10px",
-          fontSize: "1.2em",
-          color: "#fff",
-          textShadow: "1px 1px 4px black, -1px -1px 4px black",
-          pointerEvents: "none",
-        }}
-      >
-        {`${Math.max(0, 3 - k)} re-roll left`}
-      </span>
-    )}
+    <span
+      style={{
+        marginLeft: "10px",
+        fontSize: "1.2em",
+        fontWeight: 800,
+        color: "#fff",
+        textShadow:
+          "1px 0px 0.5px #0008, -1px 0px 0.5px #0008, 0px -1px 0.5px #0008, 0px 1px 0.5px #0008",
+        pointerEvents: "none",
+      }}
+    >
+      {`${remainingRerolls} re-roll left`}
+    </span>
   </div>
 );

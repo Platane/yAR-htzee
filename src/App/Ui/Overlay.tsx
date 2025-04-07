@@ -1,6 +1,7 @@
 import * as React from "react";
 
-export const Overlay = ({ children }: any) => (
+// TODO: make that a html dialog?
+export const Overlay = ({ children }: { children?: any }) => (
   <div
     style={{
       position: "absolute",

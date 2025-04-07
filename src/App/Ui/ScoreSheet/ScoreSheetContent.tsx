@@ -1,16 +1,16 @@
 import * as React from "react";
-import { getScore } from "../../../game/getScore";
+import { Dice } from "../Dice";
 import {
   categories,
   Category,
-  DiceRoll,
+  DiceValue,
   ScoreSheet,
-} from "../../../game/types";
-import { Dice } from "../Dice";
+} from "../../../gameRules/types";
+import { getScore } from "../../../gameRules/getScore";
 
 type Props = {
   scoreSheet: ScoreSheet;
-  rollCandidate?: DiceRoll | null;
+  rollCandidate?: DiceValue[] | null;
 
   onOpenTooltip?: (label: string) => void;
   onSelectCategory?: (category: Category) => void;
@@ -86,8 +86,8 @@ export const ScoreSheetContent = ({
 
 type LineProps = {
   category: Category;
-  roll: DiceRoll | null;
-  rollCandidate: DiceRoll | null;
+  roll: DiceValue[] | null;
+  rollCandidate: DiceValue[] | null;
   onOpenTooltip?: (label: string) => void;
   onSelect?: () => void;
 };

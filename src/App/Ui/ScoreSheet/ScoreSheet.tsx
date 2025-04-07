@@ -1,15 +1,15 @@
 import * as React from "react";
 import {
   Category,
-  DiceRoll,
+  DiceValue,
   ScoreSheet as IScoreSheet,
-} from "../../../game/types";
-import { isFinished } from "../../useGame";
+  isScoreSheetFinished,
+} from "../../../gameRules/types";
 import { ScoreSheetContent } from "./ScoreSheetContent";
 
 type Props = {
   scoreSheet: IScoreSheet;
-  rollCandidate?: DiceRoll | null;
+  rollCandidate?: DiceValue[] | null;
 
   onSelectCategory?: (category: Category) => void;
   onClose?: () => void;
@@ -62,32 +62,34 @@ export const ScoreSheet = ({
       onSelectCategory={onSelectCategory}
     />
 
-    <div
-      style={{
-        display: "flex",
-        marginBottom: "10px",
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <button
+    {reset && (
+      <div
         style={{
-          marginTop: "20px",
-          marginLeft: "auto",
-          height: "40px",
-          padding: "0 10px",
-        }}
-        onClick={() => {
-          if (
-            isFinished(scoreSheet) ||
-            window.confirm("Erase your score sheet and start over ?")
-          )
-            reset?.();
+          display: "flex",
+          marginBottom: "10px",
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        restart a new game
-      </button>
-    </div>
+        <button
+          style={{
+            marginTop: "20px",
+            marginLeft: "auto",
+            height: "40px",
+            padding: "0 10px",
+          }}
+          onClick={() => {
+            if (
+              isScoreSheetFinished(scoreSheet) ||
+              window.confirm("Erase your score sheet and start over ?")
+            )
+              reset?.();
+          }}
+        >
+          restart a new game
+        </button>
+      </div>
+    )}
   </div>
 );

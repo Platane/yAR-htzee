@@ -8,11 +8,11 @@ import { useFrame } from "@react-three/fiber";
 export const useShadowResize = () => {
   useFrame(({ scene }) => {
     let shadowCamera: THREE.OrthographicCamera | undefined;
+    box.makeEmpty();
     scene.traverse((o) => {
       if (isDirectionalLight(o) && o.castShadow) shadowCamera = o.shadow.camera;
+      if (isMesh(o) && o.castShadow) box.expandByObject(o);
     });
-
-    box.setFromObject(scene.children[0]);
 
     if (!box.isEmpty() && shadowCamera) resizeCamera(shadowCamera, box);
   });
@@ -72,3 +72,4 @@ const getBoxCorner = (box: THREE.Box3, i: number, target: THREE.Vector3) =>
 
 const isDirectionalLight = (o: any): o is THREE.DirectionalLight =>
   o.isDirectionalLight;
+const isMesh = (o: any): o is THREE.Mesh => o.isMesh;

@@ -15,7 +15,8 @@
     "react-dom": "19.1.0",
     "three": "0.175.0",
     "use-asset": "1.0.4",
-    "zustand": "5.0.3"
+    "zustand": "5.0.3",
+    "tunnel-rat": "0.1.2"
   },
   "devDependencies": {
     "vite": "6.2.5",

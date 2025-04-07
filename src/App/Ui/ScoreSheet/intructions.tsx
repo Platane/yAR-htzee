@@ -1,4 +1,4 @@
-import { Category } from "../../../game/types";
+import { Category } from "../../../gameRules/types";
 
 export const categoryInstruction: Record<Category, string> = {
   Aces: "Count and add only aces",

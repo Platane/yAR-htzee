@@ -5,9 +5,10 @@ import loadable from "@loadable/component";
 const LazyApp = loadable(() => import("./App"));
 
 export const Boot = () => {
-  const [loadingStatus, setLoadingStatus] = React.useState<
-    "ready" | { progress: number }
-  >({ progress: 0 });
+  const [status, setStatus] = React.useState<
+    "ready" | { progressValue: number; progressLabel: string }
+  >({ progressValue: 0, progressLabel: "loading app" });
+
   const [started, setStarted] = React.useState(false);
 
   return (
@@ -15,21 +16,17 @@ export const Boot = () => {
       <React.Suspense fallback={null}>
         <LazyApp
           started={started}
-          onReady={() => setLoadingStatus("ready")}
-          onProgress={(progress) =>
-            setLoadingStatus((s) => (s === "ready" ? s : { progress }))
+          onReady={() => setStatus("ready")}
+          onProgress={(progressValue, progressLabel) =>
+            setStatus((s) =>
+              s === "ready" ? s : { progressValue, progressLabel }
+            )
           }
         />
       </React.Suspense>
 
       {!started && (
-        <LoadingScreen
-          loading={loadingStatus !== "ready"}
-          loadingProgress={
-            loadingStatus !== "ready" ? loadingStatus.progress : 1
-          }
-          onClose={() => setStarted(true)}
-        />
+        <LoadingScreen status={status} onClose={() => setStarted(true)} />
       )}
     </ErrorBoundary>
   );

@@ -1,4 +1,4 @@
-import { ScoreSheet } from "../game/types";
+import { ScoreSheet } from "../types";
 
 export const scoreSheet: ScoreSheet = {
   Aces: null,

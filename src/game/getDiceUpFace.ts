@@ -1,5 +1,5 @@
 import * as CANNON from "cannon-es";
-import { DiceValue } from "./types";
+import { DiceValue } from "../gameRules/types";
 
 /**
  * get the value of the face of the dice facing up
@@ -40,3 +40,11 @@ export const getDiceUpFace = (q: CANNON.Quaternion) => {
 
 const q_ = new CANNON.Quaternion();
 const up = new CANNON.Vec3(0, 1, 0);
+
+export const isDiceFlat = (q: CANNON.Quaternion) => {
+  return true;
+};
+
+export const isBodySleeping = (body: CANNON.Body) =>
+  body.velocity.lengthSquared() < 0.1 &&
+  body.angularVelocity.lengthSquared() < 0.007;

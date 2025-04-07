@@ -1,9 +1,12 @@
 import * as React from "react";
 import { PageRules } from "./PageRules";
 
-type Props = { onClose: () => void; loading: boolean; loadingProgress: number };
+type Props = {
+  onClose: () => void;
+  status: "ready" | { progressValue: number; progressLabel: string };
+};
 
-export const LoadingScreen = ({ onClose, loading, loadingProgress }: Props) => (
+export const LoadingScreen = ({ onClose, status }: Props) => (
   <div
     style={{
       padding: "10px",
@@ -22,12 +25,14 @@ export const LoadingScreen = ({ onClose, loading, loadingProgress }: Props) => (
         marginTop: "60px",
         alignSelf: "center",
       }}
-      onClick={loading ? undefined : onClose}
-      disabled={loading}
+      onClick={onClose}
+      disabled={status != "ready"}
     >
-      {loading &&
-        `loading ${(loadingProgress * 100).toFixed(0).padStart(3, " ")}% ...`}
-      {!loading && "Start"}
+      {status === "ready"
+        ? "Start"
+        : `${status.progressLabel} ${(status.progressValue * 100)
+            .toFixed(0)
+            .padStart(3, " ")}% ...`}
     </button>
   </div>
 );
