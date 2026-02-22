@@ -20,8 +20,6 @@ import { LoadingScreen } from "./Ui/LoadingScreen";
 // @ts-ignore
 import { Visualizer } from "react-touch-visualizer";
 
-// @ts-ignore
-const xr8ApiKey: string | undefined = import.meta.env.VITE_XR8_API_KEY;
 const touchSupported =
   typeof document !== "undefined" && "ontouchend" in document;
 
@@ -76,7 +74,7 @@ export const App = () => {
 
   const startXR8 = () => {
     setState({ type: "xr8" });
-    loadXR8(xr8ApiKey)
+    loadXR8()
       .then((xr8) => setState({ type: "xr8", xr8 }))
       .catch(setError);
   };
@@ -85,7 +83,7 @@ export const App = () => {
 
   const webXRSupported = useIsWebXRSupported();
 
-  const xr8Supported = (!!xr8ApiKey || xr8Hosted) && touchSupported;
+  const xr8Supported = (xr8Hosted || true) && touchSupported;
 
   const sceneAssetLoaded = useProgress(({ active }) => !active);
 

@@ -17,6 +17,7 @@ jobs:
       - run: bun type
       - run: bun lint
       - run: bun test
+      - run: bun run download-8th-sdk
       - run: bunx vite build --base yAR-htzee
         env:
           VITE_XR8_API_KEY: ${{ secrets.VITE_XR8_API_KEY }}

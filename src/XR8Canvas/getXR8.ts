@@ -15,21 +15,23 @@ export const xr8Hosted =
  * load 8th wall sdk once
  * resolve with XR8 when it's ready
  */
-export const loadXR8 = async (apiKey?: string) => {
+export const loadXR8 = async () => {
   // in 8thwall demo page, the script is loaded automatically
   if (!xr8Hosted) {
-    const src = `//apps.8thwall.com/xrweb?appKey=${apiKey}`;
-    await loadScript(src);
+    const xrUrl = "./8thwall-sdk/xr.js";
+    await loadScript(xrUrl);
   }
 
-  const xr8 = getXR8();
-  if (xr8) return xr8;
-  else {
+  let xr8 = getXR8();
+  if (!xr8) {
     await new Promise((resolve: any) =>
       window.addEventListener("xrloaded", resolve)
     );
-    return getXR8()!;
+    xr8 = getXR8()!;
   }
+  await xr8.loadChunk("slam");
+
+  return xr8;
 };
 
 export const loadScript = (src: string) =>

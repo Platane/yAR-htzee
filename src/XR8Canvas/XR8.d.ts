@@ -1,4 +1,6 @@
 export type XR8 = {
+  loadChunk: (feature: "slam") => Promise<void>;
+
   run: (o: any) => void;
   stop: () => void;
   pause: () => void;

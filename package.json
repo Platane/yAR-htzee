@@ -19,7 +19,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.20250415.0",
     "@types/bun": "1.2.9",
-    "@types/loadable__component": "5.13.9",
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.2",
     "@types/three": "0.175.0",
@@ -30,6 +29,7 @@
     "wrangler": "4.11.0"
   },
   "scripts": {
+    "download-8th-sdk": "( mkdir -p public/8thwall-sdk ; cd public/8thwall-sdk ; wget https://github.com/8thwall/engine/raw/refs/heads/main/xr-standalone.zip?download= && unzip xr-standalone.zip?download= && rm xr-standalone.zip?download=)",
     "type": "tsc --noEmit",
     "lint": "prettier -c '**/*.{ts,tsx,js,jsx,json,md,html}' '!**/{build,web_modules}/**'",
     "dev": "vite",
