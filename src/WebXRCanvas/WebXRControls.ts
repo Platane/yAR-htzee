@@ -49,7 +49,7 @@ export const WebXRControls = ({
           {
             format: THREE.RGBAFormat,
             type: THREE.UnsignedByteType,
-            colorSpace: renderer.outputColorSpace,
+            colorSpace: renderer.outputColorSpace as THREE.ColorSpace,
             stencilBuffer: gl.getContextAttributes()?.stencil,
           }
         );
